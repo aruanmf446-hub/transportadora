@@ -1,0 +1,87 @@
+---
+/** Fleet — technical spec sheet with an interactive, sticky preview. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const fleet = site.data.fleet;
+const fallback = site.data.gallery[0];
+const total = fleet.reduce((a, f) => a + (f.quantity ?? 0), 0);
+---
+<Section section={section} class="fl">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    <div class="fl__grid" data-fleet>
+      <div class="fl__preview">
+        <div class="fl__sticky">
+          <div class="fl__frame media" data-reveal="mask">
+            {fleet.map((f, i) => (
+              <div class:list={['fl__img', i === 0 && 'is-on']} data-fleet-img={i}>
+                {(f.image ?? fallback) ? <Img image={f.image ?? fallback} sizes="(min-width: 1024px) 40vw, 100vw" widths={[480, 800, 1200]} /> : null}
+              </div>
+            ))}
+            <span class="fl__tag mono" data-fleet-cat>{fleet[0]?.category}</span>
+          </div>
+          {total > 0 && (
+            <p class="fl__total"><span class="fl__total-n tabular">{total}</span><span class="mono muted">unidades na frota{site.demo.enabled && ' · valores fictícios'}</span></p>
+          )}
+        </div>
+      </div>
+      <div class="fl__table" role="list">
+        {fleet.map((f, i) => (
+          <button type="button" class:list={['fl__row', i === 0 && 'is-on']} role="listitem" aria-pressed={i === 0 ? 'true' : 'false'} data-fleet-row={i} data-cat={f.category} data-reveal="fade" data-delay={String(i * 0.04)}>
+            <span class="fl__num mono">{pad(i + 1)}</span>
+            <span class="fl__name h4">{f.name}</span>
+            {f.quantity !== undefined && <span class="fl__qty tabular">{f.quantity}<small class="mono">un</small></span>}
+            <span class="fl__specs">
+              <span><em class="mono">Capacidade</em>{f.capacity}</span>
+              {f.dimensions && <span><em class="mono">Dimensões</em>{f.dimensions}</span>}
+              <span><em class="mono">Aplicação</em>{f.use}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</Section>
+<style>
+  .fl__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); }
+  .fl__preview { grid-column: 1 / span 5; }
+  .fl__sticky { position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 24px; }
+  .fl__frame { aspect-ratio: 4 / 3; }
+  .fl__img { position: absolute; inset: 0; opacity: 0; transform: scale(1.06); transition: opacity 0.6s, transform 1.2s var(--ease-out); }
+  .fl__img.is-on { opacity: 1; transform: none; }
+  .fl__img :global(img), .fl__img :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  .fl__tag { position: absolute; left: 14px; top: 14px; padding: 4px 8px; background: var(--c-bg); color: var(--c-ink); border-radius: 2px; }
+  .fl__total { display: flex; align-items: baseline; gap: 14px; }
+  .fl__total-n { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-tracking); font-size: clamp(3rem, 5vw, 5rem); line-height: 1; }
+  .fl__table { grid-column: 7 / -1; border-top: 1px solid var(--fg); }
+  .fl__row { width: 100%; text-align: left; display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 8px 16px; align-items: baseline; padding: 22px 0; border-bottom: 1px solid var(--line); transition: padding 0.5s var(--ease-out), color 0.3s; }
+  .fl__row:hover, .fl__row.is-on { padding-left: 14px; }
+  .fl__row.is-on .fl__num { color: var(--accent); }
+  .fl__num { color: var(--muted); }
+  .fl__qty { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: -0.04em; }
+  .fl__qty small { margin-left: 4px; color: var(--muted); font-size: 0.6rem; }
+  .fl__specs { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; font-size: 0.875rem; color: var(--fg-soft); max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.6s var(--ease-out), opacity 0.4s, margin 0.5s; }
+  .fl__row.is-on .fl__specs { max-height: 160px; opacity: 1; margin-top: 10px; }
+  .fl__specs em { display: block; font-style: normal; color: var(--muted); margin-bottom: 2px; }
+  @media (max-width: 1023px) { .fl__preview, .fl__table { grid-column: 1 / -1; } .fl__sticky { position: static; } .fl__specs { grid-template-columns: 1fr; } .fl__row.is-on .fl__specs { max-height: 240px; } }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-fleet]').forEach((root) => {
+    const rows = root.querySelectorAll<HTMLButtonElement>('[data-fleet-row]');
+    const imgs = root.querySelectorAll<HTMLElement>('[data-fleet-img]');
+    const cat = root.querySelector<HTMLElement>('[data-fleet-cat]');
+    const select = (i: string) => {
+      rows.forEach((r) => { const on = r.dataset.fleetRow === i; r.classList.toggle('is-on', on); r.setAttribute('aria-pressed', String(on)); if (on && cat) cat.textContent = r.dataset.cat ?? ''; });
+      imgs.forEach((im) => im.classList.toggle('is-on', im.dataset.fleetImg === i));
+    };
+    rows.forEach((r) => {
+      r.addEventListener('click', () => select(r.dataset.fleetRow!));
+      r.addEventListener('pointerenter', (e) => { if ((e as PointerEvent).pointerType === 'mouse') select(r.dataset.fleetRow!); });
+    });
+  });
+</script>

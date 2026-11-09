@@ -1,0 +1,46 @@
+---
+import Section from '../components/Section.astro';
+import Img from '../components/Img.astro';
+import { lines, url, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[]; crumbs?: { label: string; href?: string }[] }
+const { section, crumbs } = Astro.props;
+const c = section.content;
+const compact = section.variant === 'compact';
+const titleLines = lines(c.title);
+---
+<Section section={section} class:list={['ph', compact && 'ph--compact']}>
+  <div class="container">
+    <nav class="ph__crumbs mono" aria-label="Você está em" data-reveal="fade" data-immediate data-delay="0.5">
+      <a href={url('')}>Início</a>
+      {(crumbs ?? [{ label: c.eyebrow ?? '' }]).map((cr) => (<><span aria-hidden="true">/</span>{cr.href ? <a href={cr.href}>{cr.label}</a> : <span aria-current="page">{cr.label}</span>}</>))}
+    </nav>
+    <h1 class="display ph__title" data-reveal="words" data-immediate data-delay="0.6">
+      {titleLines.map((l) => <span class="line-break">{l}</span>)}
+    </h1>
+    <div class="ph__row">
+      <span class="rule ph__rule" data-reveal="rule" data-immediate data-delay="0.8"></span>
+      {c.lead && <p class="lead ph__lead" data-reveal="fade" data-immediate data-delay="1">{c.lead}</p>}
+    </div>
+  </div>
+  {c.image && !compact && (
+    <div class="ph__media container">
+      <div class="media ph__frame" data-reveal="mask" data-immediate data-delay="0.9">
+        <div class="ph__inner" data-parallax="0.18"><Img image={c.image} loading="eager" sizes="100vw" /></div>
+      </div>
+    </div>
+  )}
+</Section>
+<style>
+  .ph { padding-top: calc(var(--header-h) + clamp(64px, 11vw, 180px)); padding-bottom: var(--section-y-sm); }
+  .ph--compact { padding-bottom: 0; }
+  .ph__crumbs { display: flex; gap: 10px; color: var(--muted); margin-bottom: clamp(24px, 3vw, 40px); }
+  .ph__crumbs a:hover { color: var(--accent); }
+  .ph__title { max-width: 14ch; }
+  .ph__row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); margin-top: clamp(32px, 4vw, 64px); align-items: start; }
+  .ph__rule { grid-column: 1 / span 6; margin-top: 0.9em; }
+  .ph__lead { grid-column: 8 / -1; }
+  .ph__media { margin-top: clamp(56px, 7vw, 120px); }
+  .ph__frame { aspect-ratio: 21 / 9; }
+  .ph__inner { position: absolute; inset: -10% 0; }
+  @media (max-width: 900px) { .ph__rule { grid-column: 1 / -1; } .ph__lead { grid-column: 1 / -1; } .ph__frame { aspect-ratio: 4 / 3; } }
+</style>

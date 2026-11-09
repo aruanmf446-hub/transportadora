@@ -1,0 +1,91 @@
+---
+/** Individual service page (generated from data.services). */
+import Img from './Img.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import { site, url, pad, serviceUrl, caseUrl } from '../lib/site';
+import type { Service, PageConfig } from '../config/schema';
+interface Props { service: Service; parent: PageConfig }
+const { service: s, parent } = Astro.props;
+const others = site.data.services.filter((x) => x.slug !== s.slug);
+const related = site.data.cases.filter((c) => c.services.includes(s.slug));
+---
+<section class="section sd" data-theme="light">
+  <div class="container">
+    <nav class="sd__crumbs mono" aria-label="Você está em" data-reveal="fade" data-immediate data-delay="0.4">
+      <a href={url('')}>Início</a><span aria-hidden="true">/</span><a href={url(parent.path)}>{parent.navLabel ?? parent.title}</a><span aria-hidden="true">/</span><span aria-current="page">{s.title}</span>
+    </nav>
+    {s.kicker && <p class="eyebrow" data-reveal="fade" data-immediate data-delay="0.5">{s.kicker}</p>}
+    <h1 class="display sd__title" data-reveal="words" data-immediate data-delay="0.55">{s.title}</h1>
+    <div class="sd__intro">
+      <p class="lead" data-reveal="fade" data-immediate data-delay="0.9">{s.description}</p>
+      <div data-reveal="fade" data-immediate data-delay="1"><Button href="#cotacao" anchors={['cotacao']} label="Solicitar cotação" variant="accent" /></div>
+    </div>
+  </div>
+  {s.image && (
+    <div class="container"><div class="media sd__media" data-reveal="mask" data-immediate data-delay="0.8"><div class="sd__inner" data-parallax="0.16"><Img image={s.image} loading="eager" sizes="100vw" /></div></div></div>
+  )}
+  <div class="container sd__body">
+    {s.features.length > 0 && (
+      <div class="sd__block">
+        <h2 class="eyebrow">O que inclui</h2>
+        <ul class="sd__features" data-reveal="stagger">{s.features.map((f, i) => <li><span class="mono muted">{pad(i + 1)}</span>{f}</li>)}</ul>
+      </div>
+    )}
+    {s.specs.length > 0 && (
+      <div class="sd__block">
+        <h2 class="eyebrow">Especificações</h2>
+        <dl class="sd__specs" data-reveal="stagger">{s.specs.map((sp) => <div><dt class="mono muted">{sp.label}</dt><dd>{sp.value}</dd></div>)}</dl>
+      </div>
+    )}
+  </div>
+  {s.process.length > 0 && (
+    <div class="container sd__process">
+      <h2 class="h2" data-reveal="lines">Como operamos</h2>
+      <ol class="sd__steps">
+        {s.process.map((p, i) => (<li data-reveal="fade" data-delay={String(i * 0.08)}><span class="sd__n">{pad(i + 1)}</span><h3 class="h4">{p.title}</h3><p class="muted">{p.text}</p></li>))}
+      </ol>
+    </div>
+  )}
+  {related.length > 0 && (
+    <div class="container sd__related">
+      <h2 class="eyebrow">Cases relacionados</h2>
+      <ul>{related.map((c) => { const h = caseUrl(c.slug); return <li>{h ? <a class="link" href={h}>{c.title}</a> : c.title}</li>; })}</ul>
+    </div>
+  )}
+  {others.length > 0 && (
+    <nav class="container sd__others" aria-label="Outras soluções">
+      <h2 class="eyebrow">Outras soluções</h2>
+      <ul>
+        {others.map((o) => { const h = serviceUrl(o.slug); return h && <li><a href={h} class="sd__other"><span class="h3">{o.title}</span><Icon name="arrow" size={18} /></a></li>; })}
+      </ul>
+    </nav>
+  )}
+</section>
+<style>
+  .sd { padding-top: calc(var(--header-h) + clamp(56px, 9vw, 150px)); }
+  .sd__crumbs { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); margin-bottom: 32px; }
+  .sd__crumbs a:hover { color: var(--accent); }
+  .sd__title { margin-top: 18px; max-width: 12ch; }
+  .sd__intro { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 32px; margin-top: 40px; }
+  .sd__media { aspect-ratio: 21 / 9; margin-top: clamp(48px, 6vw, 96px); }
+  .sd__inner { position: absolute; inset: -10% 0; }
+  .sd__body { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); margin-top: var(--section-y-sm); }
+  .sd__block { display: grid; gap: 20px; align-content: start; }
+  .sd__features li { display: grid; grid-template-columns: 2.5rem 1fr; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 1.0625rem; }
+  .sd__features { border-top: 1px solid var(--fg); }
+  .sd__specs { border-top: 1px solid var(--fg); }
+  .sd__specs div { display: grid; grid-template-columns: 10rem 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .sd__specs dd { margin: 0; }
+  .sd__process { margin-top: var(--section-y-sm); display: grid; gap: 40px; }
+  .sd__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--col-gap); counter-reset: s; }
+  .sd__steps li { display: grid; gap: 10px; align-content: start; padding-top: 16px; border-top: 1px solid var(--line); position: relative; }
+  .sd__steps li::before { content: ''; position: absolute; top: -1px; left: 0; width: 40px; height: 1px; background: var(--accent); }
+  .sd__n { font-family: var(--font-display); font-size: 2.6rem; letter-spacing: -0.05em; color: var(--accent); }
+  .sd__related, .sd__others { margin-top: var(--section-y-sm); display: grid; gap: 16px; }
+  .sd__related ul { display: grid; gap: 8px; }
+  .sd__others ul { border-top: 1px solid var(--line); }
+  .sd__other { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--line); transition: padding 0.5s var(--ease-out), color 0.3s; }
+  .sd__other:hover { padding-left: 12px; color: var(--accent); }
+  @media (max-width: 900px) { .sd__body { grid-template-columns: 1fr; } .sd__steps { grid-template-columns: 1fr 1fr; } .sd__media { aspect-ratio: 4 / 3; } .sd__specs div { grid-template-columns: 1fr; gap: 2px; } }
+</style>

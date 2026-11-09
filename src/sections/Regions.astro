@@ -1,0 +1,54 @@
+---
+/** Regions served — coverage bars (values from config). */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const regions = site.data.geo.regions;
+---
+<Section section={section} class="rg">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    <ol class="rg__list">
+      {regions.map((r, i) => (
+        <li class="rg__row" data-reveal="fade" data-delay={String(i * 0.06)}>
+          <span class="rg__num mono">{pad(i + 1)}</span>
+          <h3 class="rg__name h2">{r.name}</h3>
+          <div class="rg__meta">
+            {r.states.length > 0 && <p class="rg__states mono">{r.states.join(' · ')}</p>}
+            {r.detail && <p class="muted">{r.detail}</p>}
+          </div>
+          {r.coverage !== undefined && (
+            <div class="rg__cov">
+              <span class="rg__pct tabular" data-counter data-value={r.coverage} data-decimals="0"><span data-counter-value>{r.coverage}</span>%</span>
+              <span class="rg__bar" aria-hidden="true"><i data-rg-bar style={`--v:${r.coverage / 100}`}></i></span>
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+    {site.demo.enabled && <p class="demo-flag rg__flag">Percentuais ilustrativos</p>}
+  </div>
+</Section>
+<style>
+  .rg__list { border-top: 1px solid var(--fg); }
+  .rg__row { display: grid; grid-template-columns: 3.5rem minmax(0, 4fr) minmax(0, 3fr) minmax(0, 4fr); gap: var(--col-gap); align-items: center; padding-block: clamp(20px, 2.4vw, 36px); border-bottom: 1px solid var(--line); }
+  .rg__num { color: var(--muted); }
+  .rg__name { font-size: clamp(1.9rem, 3.6vw, 3.6rem); }
+  .rg__states { color: var(--fg); }
+  .rg__cov { display: grid; grid-template-columns: 4.5rem 1fr; align-items: center; gap: 16px; }
+  .rg__pct { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: -0.04em; }
+  .rg__bar { position: relative; height: 10px; background: repeating-linear-gradient(90deg, var(--line) 0 2px, transparent 2px 6px); }
+  .rg__bar i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--v)); transition: transform 1.6s var(--ease-out); }
+  :global(.motion-ok) .rg__bar i { transform: scaleX(0); }
+  :global(.motion-ok) .rg__bar i.is-in { transform: scaleX(var(--v)); }
+  .rg__flag { margin-top: 20px; }
+  @media (max-width: 900px) { .rg__row { grid-template-columns: 2.4rem 1fr; } .rg__meta, .rg__cov { grid-column: 2; } }
+</style>
+<script>
+  const bars = document.querySelectorAll<HTMLElement>('[data-rg-bar]');
+  const io = new IntersectionObserver((en) => en.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { rootMargin: '-10% 0px' });
+  bars.forEach((b) => io.observe(b));
+</script>

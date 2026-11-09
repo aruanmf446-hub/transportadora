@@ -1,0 +1,51 @@
+---
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const jobs = site.data.jobs;
+const portal = site.integrations.careers;
+---
+<Section section={section} class="cr">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    {c.items && (
+      <ol class="cr__values" data-reveal="stagger">
+        {c.items.map((it, i) => (<li><span class="mono accent">{pad(i + 1)}</span><h3 class="h4">{it.title}</h3>{it.text && <p class="muted">{it.text}</p>}</li>))}
+      </ol>
+    )}
+    {jobs.length > 0 && (
+      <ul class="cr__jobs">
+        {jobs.map((j, i) => {
+          const href = j.url ?? portal?.url;
+          const Tag = href ? 'a' : 'div';
+          return (
+            <li data-reveal="fade" data-delay={String(i * 0.05)}>
+              <Tag href={href} class="cr__job" {...(href ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                <span class="h4">{j.title}</span>
+                <span class="mono muted">{j.area}</span>
+                <span>{j.location}</span>
+                <span class="mono muted">{j.type}</span>
+                {href && <Icon name="arrow-diag" />}
+              </Tag>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+    {portal && <div class="cr__cta" data-reveal="fade"><Button href={portal.url} label={portal.label} variant="accent" /></div>}
+  </div>
+</Section>
+<style>
+  .cr__values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--col-gap); margin-bottom: clamp(56px, 7vw, 112px); }
+  .cr__values li { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--fg); }
+  .cr__jobs { border-top: 1px solid var(--line); }
+  .cr__job { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(0, 2fr) minmax(0, 2fr) 24px; gap: var(--col-gap); align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); transition: padding 0.5s var(--ease-out), color 0.3s; }
+  a.cr__job:hover { padding-left: 14px; color: var(--accent); }
+  .cr__cta { margin-top: 40px; }
+  @media (max-width: 900px) { .cr__values { grid-template-columns: 1fr; } .cr__job { grid-template-columns: 1fr 24px; gap: 4px; } .cr__job > :nth-child(n+2):not(:last-child) { grid-column: 1; } .cr__job > :last-child { grid-row: 1; grid-column: 2; } }
+</style>

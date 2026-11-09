@@ -1,0 +1,76 @@
+---
+/** Clients & partners (wordmarks or logos) + testimonials. */
+import Section from '../components/Section.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+const { clients, testimonials } = site.data;
+const showTestimonials = section.variant === 'testimonials' || section.variant === undefined;
+const fonts = ['var(--font-display)', 'var(--font-mono)', 'var(--font-body)'];
+---
+<Section section={section} class="cl" tight>
+  <div class="container">
+    <div class="cl__top">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      {site.demo.enabled && <span class="demo-flag">Marcas fictícias</span>}
+    </div>
+    {clients.length > 0 && (
+      <ul class="cl__logos" data-reveal="stagger">
+        {clients.map((cl, i) => (
+          <li class="cl__logo" title={cl.sector}>
+            {cl.logo ? <img src={cl.logo} alt={cl.name} loading="lazy" /> : <span style={`font-family:${fonts[i % 3]};font-weight:${i % 2 ? 500 : 650}`}>{cl.name}</span>}
+          </li>
+        ))}
+      </ul>
+    )}
+    {showTestimonials && testimonials.length > 0 && (
+      <div class="cl__quotes" data-cl-quotes>
+        {testimonials.map((t, i) => (
+          <figure class:list={['cl__quote', i === 0 && 'is-on']} data-quote={i} aria-hidden={i === 0 ? undefined : 'true'}>
+            <blockquote class="h2">“{t.quote}”</blockquote>
+            <figcaption><strong>{t.author}</strong><span class="muted">{t.role} · {t.company}</span></figcaption>
+          </figure>
+        ))}
+        {testimonials.length > 1 && (
+          <div class="cl__nav" role="group" aria-label="Depoimentos">
+            {testimonials.map((_, i) => <button type="button" class:list={['cl__dot', i === 0 && 'is-on']} aria-label={`Depoimento ${i + 1}`} aria-pressed={i === 0 ? 'true' : 'false'} data-quote-btn={i}></button>)}
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</Section>
+<style>
+  .cl__top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .cl__logos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .cl__logo { display: grid; place-items: center; aspect-ratio: 2.4 / 1; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: clamp(1rem, 1.8vw, 1.6rem); letter-spacing: -0.03em; color: var(--muted); transition: color 0.4s, background-color 0.4s; }
+  .cl__logo:hover { color: var(--fg); background: var(--surface); }
+  .cl__logo img { max-width: 60%; max-height: 50%; filter: grayscale(1); opacity: 0.7; }
+  .cl__quotes { position: relative; display: grid; margin-top: clamp(64px, 8vw, 128px); }
+  .cl__quote { grid-area: 1 / 1; display: grid; gap: 28px; opacity: 0; transform: translateY(16px); transition: opacity 0.7s, transform 0.9s var(--ease-out); pointer-events: none; }
+  .cl__quote.is-on { opacity: 1; transform: none; pointer-events: auto; }
+  .cl__quote blockquote { max-width: 26ch; text-indent: -0.4em; }
+  .cl__quote figcaption { display: grid; gap: 2px; }
+  .cl__nav { display: flex; gap: 8px; margin-top: 32px; }
+  .cl__dot { width: 36px; height: 3px; background: var(--line); transition: background-color 0.3s; }
+  .cl__dot.is-on { background: var(--accent); }
+  @media (max-width: 760px) { .cl__logos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-cl-quotes]').forEach((root) => {
+    const quotes = root.querySelectorAll<HTMLElement>('[data-quote]');
+    const btns = root.querySelectorAll<HTMLButtonElement>('[data-quote-btn]');
+    if (quotes.length < 2) return;
+    let i = 0;
+    let timer = 0;
+    const show = (n: number) => {
+      i = (n + quotes.length) % quotes.length;
+      quotes.forEach((q, k) => { q.classList.toggle('is-on', k === i); q.toggleAttribute('aria-hidden', k !== i); });
+      btns.forEach((b, k) => { b.classList.toggle('is-on', k === i); b.setAttribute('aria-pressed', String(k === i)); });
+    };
+    const auto = () => { clearInterval(timer); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) timer = window.setInterval(() => show(i + 1), 7000); };
+    btns.forEach((b, k) => b.addEventListener('click', () => { show(k); auto(); }));
+    auto();
+  });
+</script>

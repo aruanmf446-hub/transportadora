@@ -1,0 +1,18 @@
+---
+import type { ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; class?: string; theme?: string; flush?: boolean; tight?: boolean; tag?: string }
+const { section, class: cls, theme = 'light', flush = false, tight = false, tag: _tag, ...rest } = Astro.props;
+const t = section.theme ?? theme;
+---
+<section
+  id={section.anchor}
+  class:list={['section', `sec-${section.type}`, flush && 'section--flush', tight && 'section--tight', cls]}
+  data-theme={t}
+  data-anim={section.animation}
+  data-variant={section.variant}
+  data-section={section.type}
+  aria-label={section.navLabel ?? section.content?.eyebrow ?? undefined}
+  {...rest}
+>
+  <slot />
+</section>

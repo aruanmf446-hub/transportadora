@@ -1,0 +1,33 @@
+---
+/**
+ * Single dynamic route: every enabled page in the config + detail pages
+ * generated from data (services, cases). Disabled pages are never built.
+ */
+import Base from '../layouts/Base.astro';
+import Sections from '../components/Sections.astro';
+import ServiceDetail from '../components/ServiceDetail.astro';
+import CaseDetail from '../components/CaseDetail.astro';
+import { enabledPages, resolveSections, servicePages, casePages } from '../lib/site';
+import type { PageConfig, Service, Case } from '../config/schema';
+
+export function getStaticPaths() {
+  const pages = enabledPages().map((page) => ({ params: { slug: page.path || undefined }, props: { kind: 'page' as const, page } }));
+  const services = servicePages().map((s) => ({ params: { slug: s.path }, props: { kind: 'service' as const, page: s.page, service: s.service } }));
+  const cases = casePages().map((c) => ({ params: { slug: c.path }, props: { kind: 'case' as const, page: c.page, item: c.item } }));
+  return [...pages, ...services, ...cases];
+}
+
+type Props = { kind: 'page'; page: PageConfig } | { kind: 'service'; page: PageConfig; service: Service } | { kind: 'case'; page: PageConfig; item: Case };
+const props = Astro.props as Props;
+const { page } = props;
+const sections = resolveSections(props.kind === 'page' ? page.sections : page.detailSections);
+const index = sections.filter((s) => !s.hideFromIndex && s.navLabel).map((s) => ({ anchor: s.anchor, label: s.navLabel! }));
+const title = props.kind === 'service' ? props.service.title : props.kind === 'case' ? props.item.title : page.kind === 'home' ? undefined : page.title;
+const description = props.kind === 'service' ? props.service.short : props.kind === 'case' ? props.item.summary : page.description;
+const currentPath = props.kind === 'page' ? page.path : `${page.path}/${props.kind === 'service' ? props.service.slug : props.item.slug}`;
+---
+<Base title={title} description={description} currentPath={currentPath} sectionIndex={props.kind === 'page' ? index : []}>
+  {props.kind === 'service' && <ServiceDetail service={props.service} parent={page} />}
+  {props.kind === 'case' && <CaseDetail item={props.item} parent={page} />}
+  <Sections sections={sections} />
+</Base>

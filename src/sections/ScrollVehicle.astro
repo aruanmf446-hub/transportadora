@@ -1,0 +1,116 @@
+---
+/**
+ * Scroll-driven vehicle sequence: a pinned 3D road scene whose camera follows
+ * the scroll through chapters. Without WebGL / reduced motion it becomes a
+ * static editorial list with an image.
+ */
+import Section from '../components/Section.astro';
+import Img from '../components/Img.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+const chapters = c.items ?? [];
+const { scene3d } = site;
+const truckCfg = JSON.stringify({ ...scene3d.truck, palette: undefined });
+const fallback = c.image ?? site.data.gallery.find((g) => /dark|night|noite/i.test(g.src)) ?? site.hero.fallbackImage;
+---
+<Section section={section} class="sv" flush>
+  <div class="sv__pin" data-sv>
+    <div class="sv__stage" data-sv-stage data-truck={truckCfg} data-mobile={scene3d.mobileQuality} data-enabled={scene3d.enabled ? '1' : '0'}>
+      <div class="sv__fallback">{fallback && <Img image={fallback} sizes="100vw" />}</div>
+    </div>
+    <div class="sv__ui container">
+      <header class="sv__head">
+        {c.eyebrow && <p class="eyebrow">{c.eyebrow}</p>}
+        {c.title && <h2 class="h2 sv__title">{c.title}</h2>}
+      </header>
+      <ol class="sv__chapters" data-sv-chapters>
+        {chapters.map((ch, i) => (
+          <li class:list={['sv__ch', i === 0 && 'is-on']} data-ch={i}>
+            <p class="mono sv__meta">{ch.meta ?? pad(i + 1)}</p>
+            <h3 class="h1 sv__ch-title">{ch.title}</h3>
+            {ch.text && <p class="lead">{ch.text}</p>}
+          </li>
+        ))}
+      </ol>
+      <div class="sv__progress" aria-hidden="true">
+        {chapters.map((_, i) => <span data-pg={i}><i></i></span>)}
+      </div>
+    </div>
+  </div>
+</Section>
+<style>
+  .sv { --pin-h: 100svh; }
+  .sv__pin { position: relative; height: var(--pin-h); min-height: 600px; overflow: hidden; }
+  .sv__stage { position: absolute; inset: 0; }
+  .sv__stage :global(.stage-canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 1.2s; }
+  .sv__stage:global(.is-ready) :global(.stage-canvas) { opacity: 1; }
+  .sv__fallback { position: absolute; inset: 0; transition: opacity 1s; }
+  .sv__fallback::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 85%, transparent), transparent 70%); }
+  .sv__fallback :global(img), .sv__fallback :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  .sv__stage:global(.is-ready) .sv__fallback { opacity: 0; }
+  .sv__ui { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-top: calc(var(--header-h) + 40px); padding-bottom: 40px; pointer-events: none; }
+  .sv__head { display: grid; gap: 14px; max-width: 30ch; }
+  .sv__chapters { position: relative; align-self: end; display: grid; }
+  .sv__ch { grid-area: 1 / 1; max-width: 32ch; display: grid; gap: 16px; align-content: end; opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.9s var(--ease-out); }
+  .sv__ch.is-on { opacity: 1; transform: none; }
+  .sv__meta { color: var(--accent); }
+  .sv__ch-title { font-size: clamp(2.2rem, 4.6vw, 4.8rem); }
+  .sv__progress { display: flex; gap: 8px; margin-top: 32px; }
+  .sv__progress span { position: relative; flex: 1; max-width: 120px; height: 2px; background: var(--line); overflow: hidden; }
+  .sv__progress i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  /* static mode (no WebGL / reduced motion) */
+  .sv:global(.is-static) .sv__pin { height: auto; min-height: 0; }
+  .sv:global(.is-static) .sv__stage { position: relative; height: 56vh; }
+  .sv:global(.is-static) .sv__ui { height: auto; padding-block: var(--section-y-sm); }
+  .sv:global(.is-static) .sv__chapters { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px var(--col-gap); margin-top: 48px; }
+  .sv:global(.is-static) .sv__ch { grid-area: auto; opacity: 1; transform: none; }
+  .sv:global(.is-static) .sv__ch-title { font-size: var(--fs-h3); }
+  .sv:global(.is-static) .sv__progress { display: none; }
+  @media (max-width: 760px) {
+    .sv__ch .lead { font-size: 1rem; }
+    .sv__ui { padding-bottom: 28px; }
+    .sv__ch { background: color-mix(in srgb, var(--bg) 70%, transparent); padding: 14px; margin-inline: -14px; border-radius: var(--r-m); backdrop-filter: blur(6px); }
+  }
+</style>
+<script>
+  import { gsap, ScrollTrigger, motionEnabled } from '../scripts/motion/core';
+  import { decideQuality } from '../scripts/three/stage';
+  document.querySelectorAll<HTMLElement>('[data-sv]').forEach((pin) => {
+    const sec = pin.closest('section')!;
+    const stageEl = pin.querySelector<HTMLElement>('[data-sv-stage]')!;
+    const chs = pin.querySelectorAll<HTMLElement>('[data-ch]');
+    const bars = pin.querySelectorAll<HTMLElement>('[data-pg] i');
+    const quality = stageEl.dataset.enabled === '1' ? decideQuality((stageEl.dataset.mobile as 'off' | 'low' | 'full') ?? 'low') : null;
+    if (!motionEnabled() || !chs.length) { sec.classList.add('is-static'); return; }
+    let api: { setProgress: (p: number) => void } | null = null;
+    const n = chs.length;
+    ScrollTrigger.create({
+      trigger: pin,
+      start: 'top top',
+      end: () => `+=${window.innerHeight * (n * 0.9)}`,
+      pin: true,
+      scrub: true,
+      anticipatePin: 1,
+      onUpdate: (st) => {
+        const p = st.progress;
+        api?.setProgress(p);
+        const idx = Math.min(n - 1, Math.floor(p * n));
+        chs.forEach((c, i) => c.classList.toggle('is-on', i === idx));
+        bars.forEach((b, i) => gsap.set(b, { scaleX: Math.max(0, Math.min(1, p * n - i)) }));
+      },
+    });
+    if (quality) {
+      const io = new IntersectionObserver(async (en) => {
+        if (!en[0].isIntersecting) return;
+        io.disconnect();
+        try {
+          const { mountRoad } = await import('../scripts/three/scenes/road');
+          api = await mountRoad(stageEl, quality);
+        } catch (e) { console.warn('[scroll-vehicle] fallback image kept', e); }
+      }, { rootMargin: '600px' });
+      io.observe(stageEl);
+    }
+  });
+</script>

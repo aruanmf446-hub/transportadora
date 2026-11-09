@@ -1,0 +1,50 @@
+---
+/** Operational metrics — figures come from config; demo mode labels them as fictitious. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const ids = c.options?.stats as string[] | undefined;
+const stats = ids ? site.data.stats.filter((s) => ids.includes(s.id)) : site.data.stats;
+const fmt = (v: number, d: number) => new Intl.NumberFormat(site.seo.locale, { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+---
+<Section section={section} class="mt">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} cta={c.cta} anchors={anchors} />
+    <ol class="mt__grid">
+      {stats.map((s, i) => (
+        <li class="mt__item" data-reveal="fade" data-delay={String((i % 3) * 0.08)}>
+          <span class="mt__idx mono">{pad(i + 1)}</span>
+          <p class="mt__value tabular" data-counter data-value={s.value} data-decimals={s.decimals}>
+            {s.prefix}<span data-counter-value>{fmt(s.value, s.decimals)}</span><span class="mt__suffix">{s.suffix}</span>
+          </p>
+          <p class="mt__label">{s.label}</p>
+          {s.detail && <p class="mt__detail mono">{s.detail}</p>}
+          <span class="mt__bar" aria-hidden="true"></span>
+        </li>
+      ))}
+    </ol>
+    {site.demo.enabled && <p class="demo-flag mt__flag">Valores fictícios para demonstração</p>}
+  </div>
+</Section>
+<style>
+  .mt__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .mt__item { position: relative; padding: clamp(24px, 3vw, 40px) clamp(0px, 2vw, 32px) clamp(32px, 4vw, 56px) 0; border-bottom: 1px solid var(--line); display: grid; gap: 10px; align-content: start; }
+  .mt__item:not(:nth-child(3n + 1)) { padding-left: clamp(16px, 2vw, 32px); border-left: 1px solid var(--line); }
+  .mt__idx { color: var(--muted); font-size: var(--fs-micro); }
+  .mt__value { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-tracking); font-size: clamp(3rem, 6.4vw, 6.8rem); line-height: 0.95; margin-top: clamp(24px, 4vw, 64px); white-space: nowrap; }
+  .mt__suffix { font-size: 0.42em; letter-spacing: -0.02em; margin-left: 0.06em; color: var(--accent); vertical-align: 0.9em; }
+  .mt__label { font-size: 1.0625rem; font-weight: 500; }
+  .mt__detail { color: var(--muted); }
+  .mt__bar { position: absolute; left: 0; bottom: -1px; height: 1px; width: 0; background: var(--accent); transition: width 0.9s var(--ease-out); }
+  .mt__item:hover .mt__bar { width: 100%; }
+  .mt__flag { margin-top: 24px; }
+  @media (max-width: 900px) {
+    .mt__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mt__item:not(:nth-child(3n + 1)) { padding-left: 0; border-left: 0; }
+    .mt__item:nth-child(2n) { padding-left: 16px; border-left: 1px solid var(--line); }
+  }
+  @media (max-width: 520px) { .mt__value { font-size: clamp(2.4rem, 11vw, 3.4rem); } }
+</style>

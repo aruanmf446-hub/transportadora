@@ -1,0 +1,16 @@
+---
+import Icon from './Icon.astro';
+import { resolveHref, isExternal } from '../lib/site';
+interface Props { href?: string; label?: string; variant?: 'primary' | 'accent' | 'ghost'; size?: 'sm' | 'md'; anchors?: string[]; icon?: 'arrow' | 'arrow-diag' | 'whatsapp' | 'download' | 'none'; class?: string; magnetic?: boolean }
+const { href, label, variant = 'primary', size = 'md', anchors = [], icon = 'arrow', class: cls, magnetic = true } = Astro.props;
+const resolved = resolveHref(href, anchors);
+const ext = resolved ? isExternal(resolved) : false;
+const finalIcon = icon === 'arrow' && ext ? 'arrow-diag' : icon;
+---
+{resolved && (
+  <a href={resolved} class:list={['btn', variant !== 'primary' && `btn--${variant}`, size === 'sm' && 'btn--sm', cls]} data-magnetic={magnetic ? '' : undefined} data-arrow={finalIcon === 'arrow-diag' ? 'diag' : undefined} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+    <span>{label}<slot /></span>
+    {finalIcon !== 'none' && <Icon name={finalIcon} class="btn__icon" />}
+    {ext && <span class="sr-only">(abre em nova aba)</span>}
+  </a>
+)}

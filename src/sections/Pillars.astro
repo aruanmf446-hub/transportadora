@@ -1,0 +1,73 @@
+---
+/** Editorial pillars — used by "technology" (list) and "safety" (grid). */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Button from '../components/Button.astro';
+import { pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const layout = section.variant ?? (section.type === 'technology' ? 'list' : 'grid');
+const items = c.items ?? [];
+---
+<Section section={section} class:list={['pl', `pl--${layout}`]}>
+  <div class="container">
+    {layout === 'list' ? (
+      <div class="pl__split">
+        <div class="pl__head">
+          {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+          <h2 class="h2" data-reveal="lines">{c.title}</h2>
+          {c.lead && <p class="lead" data-reveal="fade">{c.lead}</p>}
+          {c.cta && <div data-reveal="fade"><Button href={c.cta.href} label={c.cta.label} variant="ghost" anchors={anchors} /></div>}
+          <svg class="pl__diagram" viewBox="0 0 240 240" aria-hidden="true" data-pl-diagram>
+            <circle cx="120" cy="120" r="100" fill="none" stroke="currentColor" stroke-opacity=".2" />
+            <circle cx="120" cy="120" r="64" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-dasharray="2 4" />
+            <circle cx="120" cy="120" r="28" fill="none" stroke="currentColor" stroke-opacity=".5" />
+            <path d="M120 20v200M20 120h200" stroke="currentColor" stroke-opacity=".12" />
+            <g class="pl__sweep"><path d="M120 120 L120 20 A100 100 0 0 1 207 70 Z" fill="var(--accent)" fill-opacity=".12" /><path d="M120 120 L120 20" stroke="var(--accent)" /></g>
+            <circle cx="170" cy="78" r="3" fill="var(--accent)" /><circle cx="74" cy="152" r="3" fill="currentColor" /><circle cx="150" cy="170" r="3" fill="currentColor" />
+          </svg>
+        </div>
+        <ol class="pl__list">
+          {items.map((it, i) => (
+            <li class="pl__item" data-reveal="fade">
+              <span class="pl__meta mono">{it.meta ?? pad(i + 1)}</span>
+              <h3 class="h3">{it.title}</h3>
+              {it.text && <p class="muted">{it.text}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    ) : (
+      <>
+        <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} cta={c.cta} anchors={anchors} />
+        <ol class="pl__grid">
+          {items.map((it, i) => (
+            <li class="pl__cell" data-reveal="fade" data-delay={String((i % 3) * 0.08)}>
+              <span class="pl__big">{it.meta ?? pad(i + 1)}</span>
+              <h3 class="h4">{it.title}</h3>
+              {it.text && <p class="muted">{it.text}</p>}
+            </li>
+          ))}
+        </ol>
+      </>
+    )}
+  </div>
+</Section>
+<style>
+  .pl__split { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); }
+  .pl__head { grid-column: 1 / span 5; position: sticky; top: calc(var(--header-h) + 32px); align-self: start; display: grid; gap: 24px; }
+  .pl__diagram { width: min(240px, 60%); color: var(--fg); margin-top: 24px; }
+  .pl__sweep { transform-origin: 120px 120px; animation: sweep 6s linear infinite; }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  .pl__list { grid-column: 7 / -1; border-top: 1px solid var(--fg); }
+  .pl__item { display: grid; grid-template-columns: 5rem 1fr; gap: 6px 24px; padding: clamp(24px, 3vw, 44px) 0; border-bottom: 1px solid var(--line); }
+  .pl__item p { grid-column: 2; max-width: 46ch; }
+  .pl__meta { color: var(--accent); padding-top: 0.5em; }
+  .pl__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .pl__cell { display: grid; gap: 12px; align-content: start; padding: clamp(20px, 2.4vw, 36px); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); transition: background-color 0.4s; min-height: 260px; }
+  .pl__cell:hover { background: var(--surface); }
+  .pl__big { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(2.4rem, 4vw, 3.6rem); letter-spacing: -0.05em; line-height: 1; color: var(--accent); margin-bottom: auto; padding-bottom: clamp(24px, 4vw, 56px); }
+  @media (max-width: 1023px) { .pl__head, .pl__list { grid-column: 1 / -1; position: static; } .pl__list { margin-top: 48px; } .pl__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .pl__grid { grid-template-columns: 1fr; } .pl__item { grid-template-columns: 1fr; } .pl__item p { grid-column: 1; } .pl__cell { min-height: 0; } }
+</style>

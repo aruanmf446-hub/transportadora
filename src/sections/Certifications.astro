@@ -1,0 +1,40 @@
+---
+/** Certifications rendered as technical seals (SVG text on path). */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const certs = site.data.certifications;
+---
+<Section section={section} class="ct">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    <ul class="ct__list">
+      {certs.map((cert, i) => (
+        <li class="ct__item" data-reveal="fade" data-delay={String(i * 0.07)}>
+          <svg class="ct__seal" viewBox="0 0 160 160" aria-hidden="true">
+            <defs><path id={`ct-p-${i}`} d="M80 80 m-62 0 a62 62 0 1 1 124 0 a62 62 0 1 1 -124 0" /></defs>
+            <circle cx="80" cy="80" r="76" fill="none" stroke="currentColor" stroke-opacity=".25" />
+            <circle cx="80" cy="80" r="48" fill="none" stroke="currentColor" stroke-opacity=".6" />
+            <text class="ct__ring"><textPath href={`#ct-p-${i}`}>{`${cert.name} · ${cert.issuer ?? site.brand.name} · `.toUpperCase().repeat(2)}</textPath></text>
+            <text x="80" y="86" text-anchor="middle" class="ct__code">{cert.code}</text>
+          </svg>
+          <h3 class="h4">{cert.name}</h3>
+          <p class="muted">{cert.detail}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Section>
+<style>
+  .ct__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(32px, 4vw, 64px) var(--col-gap); }
+  .ct__item { display: grid; gap: 12px; justify-items: start; }
+  .ct__seal { width: 150px; height: 150px; color: var(--fg); margin-bottom: 12px; }
+  .ct__ring { font-family: var(--font-mono); font-size: 7.6px; letter-spacing: 1.6px; fill: currentColor; opacity: 0.7; }
+  .ct__seal { transition: transform 1.2s var(--ease-out); }
+  .ct__item:hover .ct__seal { transform: rotate(-30deg); }
+  .ct__code { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.3px; fill: currentColor; }
+  .ct__item:hover .ct__code { fill: var(--accent); }
+</style>

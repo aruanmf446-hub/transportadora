@@ -1,0 +1,58 @@
+---
+/** Tracking access — redirects to the company's OFFICIAL tracking platform.
+ *  The site never simulates shipment status. */
+import Section from '../components/Section.astro';
+import Icon from '../components/Icon.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+const t = site.integrations.tracking!;
+const withCode = t.url.includes('{code}');
+const host = new URL(t.url.replace('{code}', 'x')).host;
+---
+<Section section={section} class="tk" tight>
+  <div class="container tk__grid">
+    <div class="tk__head">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      <h2 class="h2" data-reveal="lines">{c.title ?? t.label}</h2>
+    </div>
+    <form class="tk__form" data-tk-form data-url={t.url} data-reveal="fade">
+      {withCode ? (
+        <label class="field tk__field">
+          <span class="field__label">{t.inputLabel}</span>
+          <span class="tk__row">
+            <input class="field__input" name="code" required autocomplete="off" inputmode="text" placeholder="Ex.: 000123456" />
+            <button class="btn btn--accent" type="submit"><span>{t.label}</span><Icon name="arrow-diag" class="btn__icon" /></button>
+          </span>
+          <span class="field__error" data-tk-error aria-live="polite"></span>
+        </label>
+      ) : (
+        <a class="btn btn--accent" href={t.url} target="_blank" rel="noopener noreferrer"><span>{t.label}</span><Icon name="arrow-diag" class="btn__icon" /></a>
+      )}
+      <p class="tk__note mono muted">Você será direcionado ao sistema oficial de rastreamento ({host}). Este site não exibe status de cargas.</p>
+    </form>
+  </div>
+</Section>
+<style>
+  .tk__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); align-items: end; }
+  .tk__head { grid-column: 1 / span 5; display: grid; gap: 20px; }
+  .tk__form { grid-column: 7 / -1; display: grid; gap: 16px; }
+  .tk__row { display: flex; gap: 12px; align-items: end; }
+  .tk__row .field__input { flex: 1; font-size: 1.4rem; }
+  .tk__note { font-size: 0.625rem; }
+  @media (max-width: 900px) { .tk__head, .tk__form { grid-column: 1 / -1; } .tk__form { margin-top: 32px; } .tk__row { flex-direction: column; align-items: stretch; } }
+</style>
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-tk-form]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.elements.namedItem('code') as HTMLInputElement | null;
+      const err = form.querySelector<HTMLElement>('[data-tk-error]');
+      const code = input?.value.trim() ?? '';
+      if (!code) { if (err) err.textContent = 'Informe o código para consultar.'; input?.focus(); return; }
+      if (err) err.textContent = '';
+      window.open(form.dataset.url!.replace('{code}', encodeURIComponent(code)), '_blank', 'noopener');
+    });
+  });
+</script>

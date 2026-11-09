@@ -1,0 +1,49 @@
+---
+/** Brand manifesto — typographic statement revealed word by word with the scroll. */
+import Section from '../components/Section.astro';
+import type { ResolvedSection } from '../lib/site';
+import { site } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+const words = (c.title ?? site.brand.description).split(' ');
+const signature = c.options?.signature as string | undefined;
+---
+<Section section={section} class="mf">
+  <div class="container grid">
+    <div class="mf__side">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      <svg class="mf__mark" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="59" fill="none" stroke="currentColor" stroke-width="1" opacity=".25" />
+        <path class="mf__arc" d="M60 1 A59 59 0 0 1 119 60" fill="none" stroke="var(--accent)" stroke-width="1.5" />
+        <path d="M30 60h60M78 48l12 12-12 12" fill="none" stroke="currentColor" stroke-width="1.25" />
+      </svg>
+    </div>
+    <p class="h2 mf__text" data-mf-text>
+      {words.map((w) => <span class="mf__w">{w} </span>)}
+    </p>
+    {signature && <p class="mf__sig mono" data-reveal="fade">{signature}</p>}
+  </div>
+</Section>
+<style>
+  .mf__side { grid-column: 1 / span 3; display: grid; align-content: space-between; gap: 32px; padding-top: 0.6em; }
+  .mf__mark { width: 84px; height: 84px; color: var(--fg); }
+  .mf__text { grid-column: 4 / -1; max-width: 22ch; font-size: clamp(2rem, 4.6vw, 4.8rem); line-height: 1.04; text-wrap: initial; }
+  .mf__w { transition: opacity 0.2s; }
+  :global(.motion-ok) .mf__w { opacity: 0.14; }
+  .mf__sig { grid-column: 4 / -1; margin-top: clamp(32px, 4vw, 56px); color: var(--muted); }
+  @media (max-width: 900px) { .mf__side, .mf__text, .mf__sig { grid-column: 1 / -1; } .mf__side { grid-template-columns: 1fr auto; align-items: center; } .mf__mark { width: 56px; height: 56px; } }
+</style>
+<script>
+  import { gsap, motionEnabled } from '../scripts/motion/core';
+  document.querySelectorAll<HTMLElement>('[data-mf-text]').forEach((el) => {
+    const words = el.querySelectorAll('.mf__w');
+    if (!motionEnabled()) { gsap.set(words, { opacity: 1 }); return; }
+    gsap.to(words, { opacity: 1, stagger: 0.08, ease: 'none', scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 45%', scrub: true } });
+    const arc = el.parentElement?.querySelector<SVGPathElement>('.mf__arc');
+    if (arc) {
+      const len = arc.getTotalLength();
+      gsap.fromTo(arc, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 45%', scrub: true } });
+    }
+  });
+</script>

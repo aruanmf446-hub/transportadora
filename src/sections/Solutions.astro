@@ -1,0 +1,81 @@
+---
+/** Solutions index — editorial list with a cursor-following image preview. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import Icon from '../components/Icon.astro';
+import { site, pad, serviceUrl, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const services = site.data.services;
+---
+<Section section={section} class="sl">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} cta={c.cta} anchors={anchors} />
+    <ol class="sl__list" data-sl-list>
+      {services.map((s, i) => {
+        const href = serviceUrl(s.slug);
+        const Tag = href ? 'a' : 'div';
+        return (
+          <li class="sl__item" data-reveal="fade" data-delay={String(i * 0.05)}>
+            <Tag href={href ?? undefined} class="sl__row" data-sl-row data-img={i}>
+              <span class="sl__num mono">{pad(i + 1)}</span>
+              <span class="sl__title h3">{s.title}</span>
+              <span class="sl__kicker mono">{s.kicker}</span>
+              <span class="sl__short">{s.short}</span>
+              {href && <span class="sl__arrow" aria-hidden="true"><Icon name="arrow" size={18} /></span>}
+            </Tag>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+  <div class="sl__preview" aria-hidden="true" data-sl-preview>
+    {services.map((s, i) => s.image && <div class="sl__pimg" data-pimg={i}><Img image={s.image} sizes="420px" widths={[480, 800]} /></div>)}
+  </div>
+</Section>
+<style>
+  .sl__list { border-top: 1px solid var(--line); }
+  .sl__item { border-bottom: 1px solid var(--line); }
+  .sl__row { position: relative; display: grid; grid-template-columns: 4rem minmax(0, 5fr) minmax(0, 2fr) minmax(0, 4fr) 3rem; align-items: center; gap: var(--col-gap); padding-block: clamp(22px, 2.6vw, 40px); }
+  .sl__row::before { content: ''; position: absolute; inset: 0 calc(var(--gutter) * -0.5); background: var(--surface); transform: scaleY(0); transform-origin: bottom; transition: transform 0.6s var(--ease-out); z-index: -1; border-radius: var(--r-s); }
+  a.sl__row:hover::before, a.sl__row:focus-visible::before { transform: scaleY(1); }
+  .sl__num { color: var(--muted); }
+  .sl__title { font-size: clamp(1.6rem, 3.1vw, 3.1rem); transition: transform 0.6s var(--ease-out); }
+  a.sl__row:hover .sl__title { transform: translateX(0.3em); }
+  .sl__kicker { color: var(--muted); }
+  .sl__short { color: var(--fg-soft); font-size: 0.9375rem; max-width: 40ch; }
+  .sl__arrow { justify-self: end; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--line); transition: background-color 0.4s, color 0.4s, transform 0.6s var(--ease-out); }
+  a.sl__row:hover .sl__arrow { background: var(--accent); color: var(--on-accent); transform: rotate(-45deg); box-shadow: none; }
+  .sl__preview { position: fixed; left: 0; top: 0; width: 300px; aspect-ratio: 4 / 5; pointer-events: none; z-index: 50; border-radius: var(--r-m); overflow: hidden; opacity: 0; transform: translate(-50%, -50%) scale(0.85); transition: opacity 0.35s, scale 0.5s var(--ease-out); }
+  .sl__preview.is-on { opacity: 1; }
+  .sl__pimg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s; }
+  .sl__pimg.is-on { opacity: 1; }
+  .sl__pimg :global(img), .sl__pimg :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 1023px) {
+    .sl__row { grid-template-columns: 2.5rem 1fr 3rem; row-gap: 8px; }
+    .sl__kicker { grid-column: 2; grid-row: 2; }
+    .sl__short { grid-column: 2; grid-row: 3; }
+    .sl__arrow { grid-column: 3; grid-row: 1; }
+    .sl__preview { display: none; }
+  }
+</style>
+<script>
+  import { gsap, isFinePointer } from '../scripts/motion/core';
+  document.querySelectorAll<HTMLElement>('.sec-solutions').forEach((sec) => {
+    const preview = sec.querySelector<HTMLElement>('[data-sl-preview]');
+    if (!preview || !isFinePointer()) return;
+    const xTo = gsap.quickTo(preview, 'x', { duration: 0.7, ease: 'power3.out' });
+    const yTo = gsap.quickTo(preview, 'y', { duration: 0.7, ease: 'power3.out' });
+    const imgs = preview.querySelectorAll<HTMLElement>('[data-pimg]');
+    sec.querySelectorAll<HTMLElement>('[data-sl-row]').forEach((row) => {
+      row.addEventListener('pointerenter', () => {
+        preview.classList.add('is-on');
+        imgs.forEach((im) => im.classList.toggle('is-on', im.dataset.pimg === row.dataset.img));
+      });
+      row.addEventListener('pointerleave', () => preview.classList.remove('is-on'));
+    });
+    sec.addEventListener('pointermove', (e) => { xTo(e.clientX + 40); yTo(e.clientY); });
+  });
+</script>

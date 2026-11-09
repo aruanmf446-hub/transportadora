@@ -1,0 +1,91 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site, navItems, url, mapsLink } from '../lib/site';
+const items = navItems();
+const { company, brand, footer, integrations, demo } = site;
+const year = new Date().getFullYear();
+const units = footer.showUnits ? company.units.slice(0, 4) : [];
+const links = [
+  integrations.clientPortal && { label: integrations.clientPortal.label, href: integrations.clientPortal.url },
+  integrations.presentation && { label: integrations.presentation.label, href: integrations.presentation.url },
+  integrations.careers && { label: integrations.careers.label, href: integrations.careers.url },
+].filter(Boolean) as { label: string; href: string }[];
+---
+<footer class="ftr" data-theme="dark">
+  <div class="container">
+    <div class="ftr__top grid">
+      <div class="ftr__statement">
+        <Logo inverse />
+        {footer.statement && <p class="h3 ftr__claim">{footer.statement}</p>}
+      </div>
+      <nav class="ftr__col" aria-label="Rodapé">
+        <p class="eyebrow">Navegação</p>
+        <ul>
+          <li><a href={url('')}>Início</a></li>
+          {items.map((it) => <li><a href={it.href}>{it.label}</a></li>)}
+        </ul>
+      </nav>
+      <div class="ftr__col">
+        <p class="eyebrow">Contato</p>
+        <ul>
+          <li><a href={`mailto:${company.contact.email}`}>{company.contact.email}</a></li>
+          <li><a href={`tel:${company.contact.phone.replace(/[^\d+]/g, '')}`}>{company.contact.phone}</a></li>
+          {company.contact.hours && <li class="muted">{company.contact.hours}</li>}
+          {links.map((l) => <li><a href={l.href} target={/^https?:/.test(l.href) ? '_blank' : undefined} rel="noopener noreferrer">{l.label} <Icon name="arrow-diag" size={11} class="ftr__ext" /></a></li>)}
+        </ul>
+      </div>
+      {units.length > 0 && (
+        <div class="ftr__col ftr__units">
+          <p class="eyebrow">Unidades</p>
+          <ul>
+            {units.map((u) => (
+              <li><a href={mapsLink(u.address, u.mapsUrl)} target="_blank" rel="noopener noreferrer"><strong>{u.city}{u.state && `/${u.state}`}</strong><span class="muted">{u.kind}</span></a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+    <div class="ftr__mark" aria-hidden="true">
+      <span class="ftr__word" data-footer-word>{brand.shortName ?? brand.name}</span>
+    </div>
+    <div class="ftr__bottom">
+      <p class="mono muted">© {year} {brand.legalName ?? brand.name}{company.registration && ` · ${company.registration}`}</p>
+      {footer.legal.length > 0 && <ul class="ftr__legal">{footer.legal.map((l) => <li><a class="mono" href={l.href}>{l.label}</a></li>)}</ul>}
+      {company.social.length > 0 && <ul class="ftr__legal">{company.social.map((s) => <li><a class="mono" href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a></li>)}</ul>}
+    </div>
+    {demo.enabled && <p class="ftr__demo demo-flag">{demo.notice}</p>}
+  </div>
+</footer>
+<style>
+  .ftr { position: relative; background: var(--bg); color: var(--fg); padding-top: clamp(80px, 10vw, 140px); overflow: hidden; }
+  .ftr__top { row-gap: 48px; }
+  .ftr__statement { grid-column: span 5; display: grid; align-content: start; gap: 28px; }
+  .ftr__claim { color: var(--fg); max-width: 14ch; }
+  .ftr__col { grid-column: span 2; display: grid; align-content: start; gap: 18px; }
+  .ftr__units { grid-column: span 3; }
+  .ftr__col ul { display: grid; gap: 8px; font-size: 0.9375rem; }
+  .ftr__col a:hover { color: var(--accent); }
+  .ftr__units a { display: grid; gap: 0; }
+  .ftr__units strong { font-weight: 500; }
+  .ftr__units span { font-size: 0.8125rem; }
+  .ftr__ext { display: inline; vertical-align: middle; }
+  .ftr__mark { margin-top: clamp(64px, 9vw, 140px); line-height: 0.74; border-bottom: 1px solid var(--line); overflow: hidden; }
+  .ftr__word { display: block; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -0.07em; font-size: clamp(5rem, 24vw, 30rem); white-space: nowrap; transform: translateY(0.08em); color: var(--fg); }
+  .ftr__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; padding-block: 28px; }
+  .ftr__legal { display: flex; gap: 20px; flex-wrap: wrap; }
+  .ftr__legal a:hover { color: var(--accent); }
+  .ftr__demo { margin-bottom: 28px; }
+  @media (max-width: 1023px) {
+    .ftr__statement { grid-column: 1 / -1; }
+    .ftr__col, .ftr__units { grid-column: span 6; }
+  }
+  @media (max-width: 560px) { .ftr__col, .ftr__units { grid-column: 1 / -1; } }
+</style>
+<script>
+  import { gsap, motionEnabled } from '../scripts/motion/core';
+  const w = document.querySelector<HTMLElement>('[data-footer-word]');
+  if (w && motionEnabled()) {
+    gsap.from(w, { yPercent: 60, ease: 'none', scrollTrigger: { trigger: w, start: 'top bottom', end: 'bottom bottom', scrub: true } });
+  }
+</script>

@@ -1,0 +1,267 @@
+---
+/**
+ * Interactive routes map — stylized dot-matrix geography computed at build
+ * time (zero map tiles, zero API keys). Cities, routes and regions come from
+ * data.geo in the client config.
+ */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, type ResolvedSection } from '../lib/site';
+import { BRAZIL, pointInPolygon } from '../data/geo/brazil';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const geo = site.data.geo;
+const outline = geo.outline === 'brazil' ? BRAZIL : null;
+
+// bounds
+const lons = outline ? outline.map((p) => p[0]) : geo.cities.map((p) => p.lon);
+const lats = outline ? outline.map((p) => p[1]) : geo.cities.map((p) => p.lat);
+const pad = outline ? 0.6 : 4;
+const minLon = Math.min(...lons) - pad, maxLon = Math.max(...lons) + pad;
+const minLat = Math.min(...lats) - pad, maxLat = Math.max(...lats) + pad;
+const k = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
+const W = 1000;
+const S = W / ((maxLon - minLon) * k);
+const H = Math.round((maxLat - minLat) * S);
+const px = (lon: number, lat: number): [number, number] => [+((lon - minLon) * k * S).toFixed(1), +((maxLat - lat) * S).toFixed(1)];
+
+// dot matrix
+const step = 0.85;
+const dots: [number, number][] = [];
+for (let lat = maxLat; lat > minLat; lat -= step)
+  for (let lon = minLon; lon < maxLon; lon += step / k) {
+    if (!outline || pointInPolygon(lon, lat, outline)) dots.push(px(lon, lat));
+  }
+
+const cities = geo.cities.map((ct) => ({ ...ct, xy: px(ct.lon, ct.lat) }));
+const byId = new Map(cities.map((ct) => [ct.id, ct]));
+const routes = geo.routes
+  .map((r, i) => {
+    const a = byId.get(r.from), b = byId.get(r.to);
+    if (!a || !b) return null;
+    const [x1, y1] = a.xy, [x2, y2] = b.xy;
+    const dx = x2 - x1, dy = y2 - y1;
+    const bend = 0.16 * (i % 2 ? 1 : -1);
+    const cx = (x1 + x2) / 2 - dy * bend, cy = (y1 + y2) / 2 + dx * bend;
+    return { ...r, id: `${section.anchor}-r${i}`, d: `M${x1} ${y1} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x2} ${y2}`, regions: [a.region, b.region] };
+  })
+  .filter((r): r is NonNullable<typeof r> => !!r);
+
+const KIND_LABEL: Record<string, string> = { road: 'Rodoviário', multimodal: 'Multimodal', dedicated: 'Dedicado', international: 'Internacional' };
+const CITY_LABEL: Record<string, string> = { hub: 'Hub', unit: 'Unidade', served: 'Atendida', port: 'Porto' };
+const kinds = [...new Set(routes.map((r) => r.kind))];
+const regions = geo.regions.filter((r) => cities.some((ct) => ct.region === r.id));
+const connections = Object.fromEntries(
+  cities.map((ct) => [ct.id, routes.filter((r) => r.from === ct.id || r.to === ct.id).map((r) => ({ to: byId.get(r.from === ct.id ? r.to : r.from)!.name, kind: KIND_LABEL[r.kind], lead: r.leadTime ?? '' }))]),
+);
+const full = section.variant === 'full';
+const labelled = new Set(cities.filter((ct) => ct.kind !== 'served').map((ct) => ct.id));
+---
+<Section section={section} class:list={['rm', full && 'rm--full']}>
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} cta={c.cta} anchors={anchors} />
+    <div class="rm__wrap" data-rm data-connections={JSON.stringify(connections)}>
+      <div class="rm__toolbar">
+        {regions.length > 0 && (
+          <div class="rm__group" role="group" aria-label="Filtrar por região">
+            <button type="button" class="rm__chip is-on" data-region="" aria-pressed="true">Todas</button>
+            {regions.map((r) => <button type="button" class="rm__chip" data-region={r.id} aria-pressed="false">{r.name}</button>)}
+          </div>
+        )}
+        {kinds.length > 1 && (
+          <div class="rm__group rm__legend" role="group" aria-label="Tipos de rota">
+            {kinds.map((kd) => <button type="button" class="rm__kind is-on" data-kind={kd} aria-pressed="true"><i class={`rm__swatch rm__swatch--${kd}`}></i>{KIND_LABEL[kd]}</button>)}
+          </div>
+        )}
+      </div>
+
+      <div class="rm__map">
+        <svg viewBox={`0 0 ${W} ${H}`} class="rm__svg" role="img" aria-label={`Mapa estilizado com ${cities.length} cidades e ${routes.length} rotas`} data-rm-svg>
+          <g class="rm__dots" aria-hidden="true">
+            {dots.map(([x, y]) => <circle cx={x} cy={y} r="2.1" />)}
+          </g>
+          <g class="rm__routes" aria-hidden="true">
+            {routes.map((r) => <path id={r.id} d={r.d} class={`rm__route rm__route--${r.kind}`} data-from={r.from} data-to={r.to} data-kind={r.kind} data-regions={r.regions.join(' ')} pathLength="1" />)}
+          </g>
+          <g class="rm__pulses" aria-hidden="true" data-rm-pulses></g>
+          <g class="rm__cities">
+            {cities.map((ct) => (
+              <g class={`rm__city rm__city--${ct.kind}`} transform={`translate(${ct.xy[0]} ${ct.xy[1]})`} data-city={ct.id} data-region={ct.region} tabindex="0" role="button" aria-label={`${ct.name}${ct.state ? ' — ' + ct.state : ''}: ${CITY_LABEL[ct.kind]}`}>
+                <circle class="rm__halo" r="16" />
+                <circle class="rm__pt" r={ct.kind === 'hub' ? 7 : ct.kind === 'served' ? 4 : 5.5} />
+                {ct.kind === 'hub' && <circle class="rm__ring" r="13" />}
+                <text class:list={['rm__label', !labelled.has(ct.id) && 'is-minor']} x="11" y="4">{ct.name}</text>
+              </g>
+            ))}
+          </g>
+        </svg>
+        <p class="rm__scale mono" aria-hidden="true">{site.data.geo.outline === 'brazil' ? 'Representação estilizada · sem escala' : 'Sem escala'}</p>
+      </div>
+
+      <aside class="rm__panel" aria-live="polite">
+        <div data-rm-empty>
+          <p class="mono muted">Selecione uma cidade</p>
+          <ul class="rm__index">
+            {cities.filter((ct) => ct.kind !== 'served').map((ct) => (
+              <li><button type="button" data-city-btn={ct.id}><span>{ct.name}{ct.state && <span class="muted">/{ct.state}</span>}</span><span class="mono muted">{CITY_LABEL[ct.kind]}</span></button></li>
+            ))}
+          </ul>
+        </div>
+        <div data-rm-info hidden>
+          <p class="mono accent" data-rm-kind></p>
+          <h3 class="h3" data-rm-name></h3>
+          <p class="muted" data-rm-note></p>
+          <ul class="rm__conns" data-rm-conns></ul>
+          <button type="button" class="link rm__back" data-rm-clear>Ver todas</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Section>
+<style>
+  .rm__wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); row-gap: 24px; }
+  .rm__toolbar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+  .rm__group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rm__chip, .rm__kind { height: 34px; padding: 0 14px; border-radius: var(--r-btn); font-size: 0.8125rem; box-shadow: inset 0 0 0 1px var(--line); display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s, color 0.3s, opacity 0.3s; }
+  .rm__chip.is-on { background: var(--fg); color: var(--bg); box-shadow: none; }
+  .rm__kind:not(.is-on) { opacity: 0.4; }
+  .rm__swatch { width: 18px; height: 2px; background: var(--fg); }
+  .rm__swatch--multimodal { background: repeating-linear-gradient(90deg, var(--accent) 0 4px, transparent 4px 7px); }
+  .rm__swatch--dedicated, .rm__swatch--international { background: var(--accent); }
+  .rm__map { grid-column: 1 / span 8; position: relative; }
+  .rm--full .rm__map { grid-column: 1 / span 9; }
+  .rm__svg { width: 100%; height: auto; overflow: visible; }
+  .rm__dots circle { fill: var(--fg); opacity: 0.14; }
+  .rm__route { fill: none; stroke: var(--fg); stroke-width: 1.4; opacity: 0.7; transition: opacity 0.4s, stroke-width 0.4s; vector-effect: non-scaling-stroke; }
+  .rm__route--multimodal { stroke: var(--accent); stroke-dasharray: 0.012 0.008; }
+  .rm__route--dedicated, .rm__route--international { stroke: var(--accent); stroke-width: 2; }
+  :global(.motion-ok) .rm__route:not(.rm__route--multimodal) { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  :global(.motion-ok) .rm__wrap.is-in .rm__route:not(.rm__route--multimodal) { stroke-dashoffset: 0; transition: stroke-dashoffset 2.2s var(--ease-in-out), opacity 0.4s; }
+  .rm__route.is-dim { opacity: 0.08; }
+  .rm__route.is-hot { opacity: 1; stroke-width: 2.6; }
+  .rm__city { cursor: pointer; outline: none; }
+  .rm__halo { fill: var(--accent); opacity: 0; transition: opacity 0.3s; }
+  .rm__city:hover .rm__halo, .rm__city:focus-visible .rm__halo, .rm__city.is-on .rm__halo { opacity: 0.18; }
+  .rm__pt { fill: var(--bg); stroke: var(--fg); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .rm__city--hub .rm__pt, .rm__city--unit .rm__pt { fill: var(--fg); }
+  .rm__city--hub .rm__pt { fill: var(--accent); stroke: var(--accent); }
+  .rm__city--port .rm__pt { fill: var(--bg); stroke: var(--accent); stroke-width: 2.5; }
+  .rm__ring { fill: none; stroke: var(--accent); stroke-width: 1; opacity: 0.6; transform-origin: center; animation: ring 2.6s var(--ease-out) infinite; }
+  @keyframes ring { from { transform: scale(0.6); opacity: 0.8; } to { transform: scale(1.8); opacity: 0; } }
+  .rm__label { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; fill: var(--fg); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+  .rm__label.is-minor { opacity: 0; transition: opacity 0.3s; }
+  .rm__city:hover .rm__label.is-minor, .rm__city:focus-visible .rm__label.is-minor, .rm__city.is-on .rm__label.is-minor, .rm__city.is-region .rm__label.is-minor { opacity: 1; }
+  .rm__city.is-dim { opacity: 0.25; }
+  .rm__pulses circle { fill: var(--accent); }
+  .rm__scale { margin-top: 8px; color: var(--muted); font-size: 0.625rem; }
+  .rm__panel { grid-column: 9 / -1; border-top: 1px solid var(--fg); padding-top: 16px; align-self: start; }
+  .rm--full .rm__panel { grid-column: 10 / -1; }
+  .rm__index { margin-top: 12px; }
+  .rm__index button { width: 100%; display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); text-align: left; transition: color 0.3s, padding 0.4s var(--ease-out); }
+  .rm__index button:hover { color: var(--accent); padding-left: 6px; }
+  [data-rm-info] { display: grid; gap: 10px; }
+  .rm__conns { margin-top: 10px; border-top: 1px solid var(--line); }
+  .rm__conns li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+  .rm__back { justify-self: start; margin-top: 12px; }
+  @media (max-width: 1023px) { .rm__map, .rm--full .rm__map, .rm__panel, .rm--full .rm__panel { grid-column: 1 / -1; } .rm__label { font-size: 18px; } }
+</style>
+<script>
+  import { motionEnabled } from '../scripts/motion/core';
+  document.querySelectorAll<HTMLElement>('[data-rm]').forEach((root) => {
+    const svg = root.querySelector<SVGSVGElement>('[data-rm-svg]')!;
+    const routes = Array.from(root.querySelectorAll<SVGPathElement>('.rm__route'));
+    const cities = Array.from(root.querySelectorAll<SVGGElement>('[data-city]'));
+    const conns = JSON.parse(root.dataset.connections || '{}') as Record<string, { to: string; kind: string; lead: string }[]>;
+    const empty = root.querySelector<HTMLElement>('[data-rm-empty]')!;
+    const info = root.querySelector<HTMLElement>('[data-rm-info]')!;
+    let region = '';
+    const kinds = new Set(routes.map((r) => r.dataset.kind!));
+    let city: string | null = null;
+
+    const render = () => {
+      routes.forEach((r) => {
+        const kindOn = kinds.has(r.dataset.kind!);
+        const inRegion = !region || r.dataset.regions!.split(' ').includes(region);
+        const touches = city && (r.dataset.from === city || r.dataset.to === city);
+        r.style.display = kindOn ? '' : 'none';
+        r.classList.toggle('is-dim', (!!city && !touches) || (!city && !inRegion));
+        r.classList.toggle('is-hot', !!touches);
+      });
+      cities.forEach((c) => {
+        const id = c.dataset.city!;
+        const linked = city && (id === city || routes.some((r) => (r.dataset.from === city && r.dataset.to === id) || (r.dataset.to === city && r.dataset.from === id)));
+        c.classList.toggle('is-on', id === city);
+        c.classList.toggle('is-region', !!region && c.dataset.region === region);
+        c.classList.toggle('is-dim', (!!city && !linked) || (!city && !!region && c.dataset.region !== region));
+      });
+    };
+    const select = (id: string | null) => {
+      city = id;
+      empty.hidden = !!id;
+      info.hidden = !id;
+      if (id) {
+        const g = cities.find((c) => c.dataset.city === id)!;
+        const [name, rest] = (g.getAttribute('aria-label') || '').split(': ');
+        info.querySelector('[data-rm-name]')!.textContent = name;
+        info.querySelector('[data-rm-kind]')!.textContent = rest ?? '';
+        info.querySelector('[data-rm-note]')!.textContent = '';
+        const list = info.querySelector('[data-rm-conns]')!;
+        list.innerHTML = '';
+        (conns[id] ?? []).forEach((cn) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span></span><span class="mono muted"></span><span class="mono"></span>`;
+          li.children[0].textContent = cn.to;
+          li.children[1].textContent = cn.kind;
+          li.children[2].textContent = cn.lead;
+          list.appendChild(li);
+        });
+        if (!(conns[id] ?? []).length) list.innerHTML = '<li><span class="muted">Atendimento sob consulta</span></li>';
+      }
+      render();
+    };
+    cities.forEach((c) => {
+      c.addEventListener('click', () => select(city === c.dataset.city ? null : c.dataset.city!));
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(c.dataset.city!); } });
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-city-btn]').forEach((b) => b.addEventListener('click', () => select(b.dataset.cityBtn!)));
+    root.querySelector('[data-rm-clear]')!.addEventListener('click', () => select(null));
+    root.querySelectorAll<HTMLButtonElement>('[data-region]').forEach((b, _, all) => b.addEventListener('click', () => {
+      region = b.dataset.region!;
+      all.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      select(null);
+    }));
+    root.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach((b) => b.addEventListener('click', () => {
+      const k = b.dataset.kind!;
+      if (kinds.has(k) && kinds.size > 1) kinds.delete(k); else kinds.add(k);
+      b.classList.toggle('is-on', kinds.has(k));
+      b.setAttribute('aria-pressed', String(kinds.has(k)));
+      render();
+    }));
+
+    const io = new IntersectionObserver((en) => {
+      if (!en[0].isIntersecting) return;
+      root.classList.add('is-in');
+      io.disconnect();
+      if (motionEnabled()) {
+        // traveling pulses along a subset of routes (SVG SMIL, no JS loop)
+        const g = root.querySelector('[data-rm-pulses]')!;
+        routes.slice(0, 12).forEach((r, i) => {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('r', '3.2');
+          const am = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+          am.setAttribute('dur', `${3 + (i % 4)}s`);
+          am.setAttribute('begin', `${2 + i * 0.35}s`);
+          am.setAttribute('repeatCount', 'indefinite');
+          const mp = document.createElementNS('http://www.w3.org/2000/svg', 'mpath');
+          mp.setAttribute('href', `#${r.id}`);
+          am.appendChild(mp);
+          c.appendChild(am);
+          g.appendChild(c);
+        });
+        (svg as SVGSVGElement & { setCurrentTime?: (t: number) => void }).setCurrentTime?.(0);
+      }
+    }, { rootMargin: '-15% 0px' });
+    io.observe(root);
+  });
+</script>

@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import { navItems } from '../lib/site';
+const items = navItems();
+---
+<Base title="Página não encontrada" noindex>
+  <section class="section nf" data-theme="light">
+    <div class="container">
+      <p class="eyebrow">Erro 404</p>
+      <h1 class="mega nf__t">Rota<span class="line-break">não encontrada.</span></h1>
+      <p class="lead">O endereço pode ter mudado. Escolha um destino:</p>
+      <ul class="nf__list">{items.map((i) => <li><a class="link" href={i.href}>{i.label}</a></li>)}</ul>
+      <Button href="/" label="Voltar ao início" />
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { padding-top: calc(var(--header-h) + 15vh); min-height: 90vh; }
+  .nf .container { display: grid; gap: 28px; justify-items: start; }
+  .nf__list { display: flex; flex-wrap: wrap; gap: 20px; }
+</style>

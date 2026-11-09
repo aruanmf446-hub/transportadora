@@ -1,0 +1,53 @@
+---
+/** Editorial section heading: eyebrow / title (| = line break) / lead / CTA */
+import Button from './Button.astro';
+import { lines } from '../lib/site';
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+  cta?: { label: string; href: string };
+  index?: string;
+  layout?: 'split' | 'stack' | 'center';
+  size?: 'h1' | 'h2' | 'display';
+  anchors?: string[];
+  reveal?: 'lines' | 'words' | 'chars';
+  class?: string;
+}
+const { eyebrow, title, lead, cta, index, layout = 'split', size = 'h2', anchors = [], reveal = 'lines', class: cls } = Astro.props;
+const Tag = size === 'display' ? 'h1' : 'h2';
+---
+<header class:list={['shead', `shead--${layout}`, cls]}>
+  {eyebrow && (
+    <div class="shead__eyebrow">
+      <p class="eyebrow" data-index={index} data-reveal="fade">{eyebrow}</p>
+    </div>
+  )}
+  <div class="shead__main">
+    {title && (
+      <Tag class:list={[size, 'shead__title']} data-reveal={reveal}>
+        {lines(title).map((l) => <span class="line-break">{l}</span>)}
+      </Tag>
+    )}
+    {(lead || cta) && (
+      <div class="shead__aside">
+        {lead && <p class="lead" data-reveal="fade" data-delay="0.15">{lead}</p>}
+        {cta && <div data-reveal="fade" data-delay="0.25"><Button href={cta.href} label={cta.label} variant="ghost" anchors={anchors} /></div>}
+      </div>
+    )}
+  </div>
+</header>
+<style>
+  .shead { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--col-gap); row-gap: 24px; margin-bottom: clamp(48px, 6vw, 96px); }
+  .shead__eyebrow { grid-column: 1 / span 3; padding-top: 0.6em; }
+  .shead__main { grid-column: 4 / -1; display: grid; gap: clamp(24px, 3vw, 40px); }
+  .shead__title { max-width: 18ch; }
+  .shead__aside { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 24px; }
+  .shead--stack .shead__eyebrow, .shead--stack .shead__main { grid-column: 1 / -1; }
+  .shead--center { text-align: center; justify-items: center; }
+  .shead--center .shead__eyebrow, .shead--center .shead__main { grid-column: 1 / -1; justify-items: center; }
+  .shead--center .shead__title { margin-inline: auto; }
+  @media (max-width: 900px) {
+    .shead__eyebrow, .shead__main { grid-column: 1 / -1; }
+  }
+</style>

@@ -1,0 +1,96 @@
+---
+/**
+ * Floating WhatsApp contact generator. Builds a pre-filled, URL-encoded
+ * message and opens WhatsApp. No data is stored anywhere.
+ */
+import Icon from './Icon.astro';
+import { site } from '../lib/site';
+const wa = site.integrations.whatsapp;
+const cargoTypes = site.integrations.quote?.cargoTypes ?? [];
+const show = wa?.enabled && wa.floatingButton;
+---
+{show && wa && (
+  <div class="wa" data-wa-widget data-number={wa.number} data-brand={site.brand.name} data-greeting={wa.greeting}>
+    <button class="wa__fab" type="button" aria-haspopup="dialog" aria-controls="wa-panel" aria-expanded="false" data-wa-open>
+      <Icon name="whatsapp" size={22} />
+      <span class="wa__fab-label">Fale no WhatsApp</span>
+    </button>
+    <div class="wa__panel" id="wa-panel" role="dialog" aria-modal="false" aria-labelledby="wa-title" data-theme="dark" hidden data-wa-panel>
+      <div class="wa__head">
+        <p id="wa-title" class="h4">Mensagem rápida</p>
+        <button type="button" class="wa__close" aria-label="Fechar" data-wa-close><Icon name="close" /></button>
+      </div>
+      <p class="wa__hint muted">Preencha o que quiser — montamos a mensagem e abrimos o WhatsApp. Nada é armazenado.</p>
+      <form class="wa__form" data-wa-form novalidate>
+        <label class="field"><span class="field__label">Nome *</span><input class="field__input" name="name" autocomplete="name" required /></label>
+        <label class="field"><span class="field__label">Empresa</span><input class="field__input" name="company" autocomplete="organization" /></label>
+        {cargoTypes.length > 0 ? (
+          <label class="field"><span class="field__label">Tipo de carga</span>
+            <select class="field__input" name="cargo"><option value="">Selecione</option>{cargoTypes.map((c) => <option>{c}</option>)}</select>
+          </label>
+        ) : (
+          <label class="field"><span class="field__label">Tipo de carga</span><input class="field__input" name="cargo" /></label>
+        )}
+        <div class="wa__row">
+          <label class="field"><span class="field__label">Origem</span><input class="field__input" name="origin" placeholder="Cidade/UF" /></label>
+          <label class="field"><span class="field__label">Destino</span><input class="field__input" name="destination" placeholder="Cidade/UF" /></label>
+        </div>
+        <label class="field"><span class="field__label">Observações</span><textarea class="field__input" name="notes" rows="2"></textarea></label>
+        <p class="field__error" data-wa-error aria-live="polite"></p>
+        <button class="btn btn--accent" type="submit"><span>Abrir WhatsApp</span><Icon name="arrow-diag" class="btn__icon" /></button>
+      </form>
+    </div>
+  </div>
+)}
+<style>
+  .wa { position: fixed; right: var(--gutter); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 650; }
+  .wa__fab { display: inline-flex; align-items: center; gap: 0; height: 56px; padding: 0 17px; border-radius: 99px; background: var(--c-ink); color: var(--c-bg); box-shadow: 0 10px 30px -12px rgba(0,0,0,.45); transition: gap .5s var(--ease-out), background-color .3s; }
+  .wa__fab:hover, .wa__fab:focus-visible { gap: 10px; background: var(--c-accent); color: var(--c-on-accent); }
+  .wa__fab-label { max-width: 0; overflow: hidden; white-space: nowrap; font-size: .875rem; font-weight: 500; transition: max-width .6s var(--ease-out); }
+  .wa__fab:hover .wa__fab-label, .wa__fab:focus-visible .wa__fab-label { max-width: 180px; }
+  .wa__panel { position: absolute; right: 0; bottom: 70px; width: min(380px, calc(100vw - 2 * var(--gutter))); max-height: calc(100vh - 120px); overflow: auto; padding: 22px; border-radius: var(--r-l); background: var(--bg); color: var(--fg); box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); transform-origin: bottom right; }
+  .wa__panel:not([hidden]) { animation: wa-in .5s var(--ease-out); }
+  @keyframes wa-in { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+  .wa__head { display: flex; justify-content: space-between; align-items: center; }
+  .wa__close { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--line); }
+  .wa__hint { font-size: .8125rem; margin: 6px 0 10px; }
+  .wa__form { display: grid; gap: 6px; }
+  .wa__form .field__input { font-size: 1rem; min-height: 44px; padding: 10px 0 8px; }
+  .wa__form select.field__input { appearance: none; background: transparent; }
+  .wa__form select option { color: #111; }
+  .wa__row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .wa__form .btn { margin-top: 8px; }
+</style>
+<script>
+  import { buildMessage, whatsappUrl } from '../lib/messages';
+  const root = document.querySelector<HTMLElement>("[data-wa-widget]");
+  if (root) {
+    const panel = root.querySelector<HTMLElement>('[data-wa-panel]')!;
+    const openBtn = root.querySelector<HTMLButtonElement>('[data-wa-open]')!;
+    const form = root.querySelector<HTMLFormElement>('[data-wa-form]')!;
+    const err = root.querySelector<HTMLElement>('[data-wa-error]')!;
+    const set = (open: boolean) => {
+      panel.hidden = !open;
+      openBtn.setAttribute('aria-expanded', String(open));
+      if (open) (form.elements.namedItem('name') as HTMLInputElement)?.focus();
+      else openBtn.focus();
+    };
+    openBtn.addEventListener('click', () => set(panel.hidden));
+    root.querySelector('[data-wa-close]')!.addEventListener('click', () => set(false));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) set(false); });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+      if (!data.name?.trim()) {
+        err.textContent = 'Informe seu nome para continuarmos.';
+        (form.elements.namedItem('name') as HTMLInputElement).focus();
+        return;
+      }
+      err.textContent = '';
+      const text = buildMessage(root.dataset.greeting || 'Olá!', data);
+      window.open(whatsappUrl(root.dataset.number!, text), '_blank', 'noopener');
+      form.reset();
+      set(false);
+    });
+  }
+</script>

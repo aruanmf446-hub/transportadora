@@ -1,0 +1,58 @@
+---
+/** Single service spotlight (Rodoviário / Cargas especiais / Multimodal / any). */
+import Section from '../components/Section.astro';
+import Img from '../components/Img.astro';
+import Button from '../components/Button.astro';
+import { findService, serviceUrl, site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const s = findService(section)!;
+const c = section.content;
+const reverse = section.variant === 'reverse';
+const href = serviceUrl(s.slug);
+const idx = site.data.services.indexOf(s) + 1;
+---
+<Section section={section} class:list={['sf', reverse && 'sf--reverse']}>
+  <div class="container sf__grid">
+    <div class="sf__media media" data-reveal="mask">
+      <div class="sf__inner" data-parallax="0.14"><Img image={c.image ?? s.image} sizes="(min-width: 1024px) 55vw, 100vw" /></div>
+      <span class="sf__badge mono">{pad(idx)} / {pad(site.data.services.length)}</span>
+    </div>
+    <div class="sf__body">
+      <p class="eyebrow" data-reveal="fade">{c.eyebrow ?? s.kicker}</p>
+      <h2 class="h1 sf__title" data-reveal="lines">{c.title ?? s.title}</h2>
+      <p class="lead" data-reveal="fade">{c.lead ?? s.description}</p>
+      {s.features.length > 0 && (
+        <ul class="sf__features" data-reveal="stagger">
+          {s.features.map((f) => <li><span class="sf__dot" aria-hidden="true"></span>{f}</li>)}
+        </ul>
+      )}
+      {s.specs.length > 0 && (
+        <dl class="sf__specs" data-reveal="fade">
+          {s.specs.slice(0, 3).map((sp) => (<div><dt class="mono">{sp.label}</dt><dd>{sp.value}</dd></div>))}
+        </dl>
+      )}
+      {href && <div data-reveal="fade"><Button href={href} label={`Explorar ${s.title.toLowerCase()}`} variant="ghost" /></div>}
+    </div>
+  </div>
+</Section>
+<style>
+  .sf__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); align-items: center; }
+  .sf__media { grid-column: 1 / span 7; aspect-ratio: 5 / 4; }
+  .sf__inner { position: absolute; inset: -8% 0; }
+  .sf__badge { position: absolute; left: 16px; top: 16px; padding: 4px 8px; background: var(--c-bg); color: var(--c-ink); border-radius: 2px; }
+  .sf__body { grid-column: 9 / -1; display: grid; gap: 24px; align-content: center; }
+  .sf--reverse .sf__media { grid-column: 6 / -1; grid-row: 1; }
+  .sf--reverse .sf__body { grid-column: 1 / span 4; grid-row: 1; }
+  .sf__title { font-size: clamp(2.2rem, 4.2vw, 4.4rem); }
+  .sf__features { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .sf__features li { display: flex; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+  .sf__dot { width: 5px; height: 5px; background: var(--accent); flex: none; }
+  .sf__specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+  .sf__specs dt { color: var(--muted); margin-bottom: 4px; }
+  .sf__specs dd { margin: 0; font-size: 0.9375rem; }
+  @media (max-width: 1023px) {
+    .sf__media, .sf--reverse .sf__media { grid-column: 1 / -1; grid-row: auto; }
+    .sf__body, .sf--reverse .sf__body { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; }
+  }
+</style>

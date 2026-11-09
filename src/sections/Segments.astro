@@ -1,0 +1,66 @@
+---
+/** Segments served — scroll-velocity marquee + detail index. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const segs = site.data.segments;
+---
+<Section section={section} class="sg">
+  <div class="container"><SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} /></div>
+  <div class="sg__marquee" aria-hidden="true" data-sg-marquee>
+    {[1, -1].map((dir) => (
+      <div class="sg__lane" data-dir={dir}>
+        <div class="sg__track">
+          {[0, 1].map(() => (
+            <div class="sg__group">{(dir === 1 ? segs : [...segs].reverse()).map((s, i) => <span class:list={['sg__word', i % 2 && 'is-outline']}>{s.name}<i class="sg__sep"></i></span>)}</div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+  <div class="container">
+    <ul class="sg__list" data-reveal="stagger">
+      {segs.map((s, i) => (<li><span class="mono muted">{pad(i + 1)}</span><strong>{s.name}</strong>{s.detail && <span class="muted">{s.detail}</span>}</li>))}
+    </ul>
+  </div>
+</Section>
+<style>
+  .sg { overflow: clip; }
+  .sg__marquee { display: grid; gap: 0.1em; margin-block: clamp(8px, 2vw, 32px) clamp(48px, 6vw, 96px); font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-tracking); font-size: clamp(3rem, 8.6vw, 9rem); line-height: 1; }
+  .sg__lane { overflow: hidden; }
+  .sg__track { display: flex; width: max-content; will-change: transform; }
+  .sg__group { display: flex; }
+  .sg__word { display: inline-flex; align-items: center; white-space: nowrap; }
+  .sg__word.is-outline { color: transparent; -webkit-text-stroke: 1px var(--fg); }
+  .sg__sep { width: 0.16em; height: 0.16em; background: var(--accent); margin-inline: 0.45em; flex: none; transform: rotate(45deg); }
+  .sg__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .sg__list li { display: grid; gap: 6px; padding: 20px 20px 24px 0; border-bottom: 1px solid var(--line); }
+  .sg__list strong { font-weight: 500; }
+  .sg__list span:last-child { font-size: 0.875rem; }
+  @media (max-width: 900px) { .sg__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+<script>
+  import { gsap, ScrollTrigger, motionEnabled } from '../scripts/motion/core';
+  document.querySelectorAll<HTMLElement>('[data-sg-marquee]').forEach((m) => {
+    const lanes = Array.from(m.querySelectorAll<HTMLElement>('.sg__lane'));
+    if (!motionEnabled()) return;
+    const state = lanes.map((l) => ({ track: l.querySelector<HTMLElement>('.sg__track')!, dir: Number(l.dataset.dir), x: 0 }));
+    let boost = 0;
+    let visible = false;
+    ScrollTrigger.create({ trigger: m, start: 'top bottom', end: 'bottom top', onToggle: (s) => (visible = s.isActive), onUpdate: (s) => (boost = Math.min(Math.abs(s.getVelocity()) / 120, 14) * Math.sign(s.getVelocity() || 1)) });
+    gsap.ticker.add((_, dt) => {
+      if (!visible) return;
+      boost *= 0.92;
+      state.forEach((s) => {
+        const w = s.track.scrollWidth / 2;
+        s.x -= (0.6 + Math.abs(boost)) * s.dir * (dt / 16);
+        if (s.x <= -w) s.x += w;
+        if (s.x > 0) s.x -= w;
+        s.track.style.transform = `translate3d(${s.x}px,0,0)`;
+      });
+    });
+  });
+</script>

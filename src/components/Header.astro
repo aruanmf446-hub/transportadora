@@ -1,0 +1,557 @@
+---
+/**
+ * Floating header + expandable menu + section index.
+ * Links are generated from enabled pages; the section index from the
+ * sections rendered on the current page.
+ */
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site, navItems, resolveHref, url, pad, pageByKind } from '../lib/site';
+
+interface Props {
+  currentPath?: string;
+  sectionIndex?: { anchor: string; label: string }[];
+}
+const { currentPath = '', sectionIndex = [] } = Astro.props;
+const items = navItems();
+const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + '/');
+const anchors = sectionIndex.map((s) => s.anchor);
+const quoteHref = site.integrations.quote?.enabled ? resolveHref('#cotacao', anchors) ?? resolveHref('contato') : resolveHref('contato');
+const { theme, integrations, company } = site;
+const extras = [
+  integrations.tracking?.enabled && { label: integrations.tracking.label, href: resolveHref('#rastreamento', anchors) ?? resolveHref('@tracking') },
+  integrations.clientPortal && { label: integrations.clientPortal.label, href: integrations.clientPortal.url },
+  integrations.presentation && { label: integrations.presentation.label, href: integrations.presentation.url },
+  integrations.externalQuote && { label: integrations.externalQuote.label, href: integrations.externalQuote.url },
+].filter((x): x is { label: string; href: string } => !!x && !!x.href);
+const hq = company.units.find((u) => u.hq) ?? company.units[0];
+const home = url('');
+void pageByKind;
+---
+<header class:list={['hdr', `hdr--${theme.nav.style}`]} data-header>
+  <div class="hdr__inner">
+    <Logo class="hdr__logo" />
+    {items.length > 0 && (
+      <nav class="hdr__nav only-desktop" aria-label="Navegação principal">
+        <ul class="hdr__list" data-nav-list>
+          {items.map((it) => (
+            <li>
+              <a href={it.href} class:list={['hdr__link', isActive(it.path) && 'is-active']} aria-current={isActive(it.path) ? 'page' : undefined}>
+                <span class="hdr__link-text" data-text={it.label}>{it.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <span class="hdr__pill" aria-hidden="true" data-nav-pill></span>
+      </nav>
+    )}
+    <div class="hdr__actions">
+      {quoteHref && (
+        <a class="btn btn--sm btn--accent hdr__cta" href={quoteHref} data-magnetic>
+          <span>Cotação</span><Icon name="arrow" class="btn__icon" />
+        </a>
+      )}
+      <button class="hdr__toggle" type="button" aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+        <span class="hdr__toggle-label"><span data-label-closed>Menu</span><span data-label-open>Fechar</span></span>
+        <span class="hdr__burger" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+  <div class="hdr__progress" aria-hidden="true"><span data-progress></span></div>
+</header>
+
+<div id="site-menu" class="menu" data-menu aria-hidden="true" role="dialog" aria-modal="true" aria-label="Menu" data-theme="dark" inert>
+  <div class="menu__bg" data-menu-bg></div>
+  <div class="menu__inner container">
+    <nav class="menu__pages" aria-label="Páginas">
+      <ol>
+        <li class="menu__item" data-menu-item>
+          <a href={home} class="menu__link" aria-current={currentPath === '' ? 'page' : undefined}>
+            <span class="menu__num mono">{pad(0)}</span><span class="menu__label">Início</span>
+          </a>
+        </li>
+        {items.map((it, i) => (
+          <li class="menu__item" data-menu-item>
+            <a href={it.href} class="menu__link" aria-current={isActive(it.path) ? 'page' : undefined}>
+              <span class="menu__num mono">{pad(i + 1)}</span><span class="menu__label">{it.label}</span>
+              {it.description && <span class="menu__desc">{it.description}</span>}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <aside class="menu__aside">
+      {sectionIndex.length > 1 && (
+        <div class="menu__block" data-menu-fade>
+          <p class="eyebrow">Nesta página</p>
+          <ul class="menu__sections">
+            {sectionIndex.map((s, i) => (
+              <li><a href={`#${s.anchor}`} data-menu-close><span class="mono muted">{pad(i + 1)}</span> {s.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div class="menu__block" data-menu-fade>
+        <p class="eyebrow">Contato</p>
+        <a class="menu__contact" href={`mailto:${company.contact.email}`}>{company.contact.email}</a>
+        <a class="menu__contact" href={`tel:${company.contact.phone.replace(/[^\d+]/g, '')}`}>{company.contact.phone}</a>
+        {hq && <p class="muted menu__small">{hq.address}</p>}
+      </div>
+      {extras.length > 0 && (
+        <div class="menu__block" data-menu-fade>
+          <p class="eyebrow">Acesso rápido</p>
+          <ul class="menu__extras">
+            {extras.map((e) => (
+              <li><a href={e.href} class="link" {...(/^https?:/.test(e.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{e.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {company.social.length > 0 && (
+        <ul class="menu__social" data-menu-fade>
+          {company.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener noreferrer" class="mono">{s.label}</a></li>)}
+        </ul>
+      )}
+    </aside>
+  </div>
+</div>
+
+{theme.nav.showSectionIndex && sectionIndex.length > 2 && (
+  <nav class="sindex" aria-label="Seções desta página" data-sindex>
+    <ol>
+      {sectionIndex.map((s, i) => (
+        <li>
+          <a href={`#${s.anchor}`} data-sindex-link={s.anchor}>
+            <span class="sindex__label">{s.label}</span>
+            <span class="sindex__num mono">{pad(i + 1)}</span>
+            <span class="sindex__tick" aria-hidden="true"></span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .hdr {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 800;
+    padding: 14px var(--gutter) 0;
+    color: var(--c-ink);
+    transition: transform 0.7s var(--ease-out), color 0.4s var(--ease-out);
+    pointer-events: none;
+  }
+  .hdr.is-hidden:not(.is-menu-open) {
+    transform: translateY(-120%);
+  }
+  .hdr.is-dark:not(.is-menu-open) {
+    color: var(--c-inverse-ink);
+  }
+  .hdr.is-menu-open {
+    color: var(--c-inverse-ink);
+  }
+  .hdr__inner {
+    pointer-events: auto;
+    max-width: calc(var(--max-w) - var(--gutter) * 2);
+    margin-inline: auto;
+    height: 58px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    padding-inline: 18px 8px;
+    border-radius: var(--r-l);
+    transition: background-color 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out), backdrop-filter 0.5s;
+  }
+  .hdr.is-scrolled:not(.is-menu-open) .hdr__inner {
+    background: color-mix(in srgb, var(--c-bg) 76%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-ink) 7%, transparent);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  }
+  .hdr.is-scrolled.is-dark:not(.is-menu-open) .hdr__inner {
+    background: color-mix(in srgb, var(--c-inverse-bg) 70%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-inverse-ink) 10%, transparent);
+  }
+  .hdr--bar {
+    padding: 0;
+  }
+  .hdr--bar .hdr__inner {
+    max-width: none;
+    border-radius: 0;
+    height: 68px;
+    padding-inline: var(--gutter);
+  }
+  .hdr__nav {
+    position: relative;
+  }
+  .hdr__list {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 2px;
+  }
+  .hdr__link {
+    position: relative;
+    display: block;
+    padding: 9px 14px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    overflow: hidden;
+    border-radius: 99px;
+  }
+  .hdr__link-text {
+    position: relative;
+    display: block;
+    transition: transform 0.55s var(--ease-out);
+  }
+  .hdr__link-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 130%;
+  }
+  .hdr__link:hover .hdr__link-text {
+    transform: translateY(-130%);
+  }
+  .hdr__link.is-active::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    background: var(--c-accent);
+  }
+  .hdr__pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: color-mix(in srgb, currentColor 9%, transparent);
+    opacity: 0;
+    transition: transform 0.5s var(--ease-out), width 0.5s var(--ease-out), opacity 0.3s;
+  }
+  .hdr__actions {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hdr__cta {
+    height: 42px;
+  }
+  .hdr__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 42px;
+    padding: 0 8px 0 14px;
+    border-radius: 99px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .hdr__toggle-label {
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    height: 1.3em;
+  }
+  .hdr__toggle-label > span {
+    grid-area: 1 / 1;
+    transition: transform 0.6s var(--ease-out);
+  }
+  [data-label-open] {
+    transform: translateY(110%);
+  }
+  .is-menu-open [data-label-open] {
+    transform: none;
+  }
+  .is-menu-open [data-label-closed] {
+    transform: translateY(-110%);
+  }
+  .hdr__burger {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 25%, transparent);
+  }
+  .hdr__burger i {
+    position: absolute;
+    left: 11px;
+    width: 12px;
+    height: 1.25px;
+    background: currentColor;
+    transition: transform 0.6s var(--ease-out), top 0.6s var(--ease-out);
+  }
+  .hdr__burger i:first-child {
+    top: 14px;
+  }
+  .hdr__burger i:last-child {
+    top: 19px;
+  }
+  .is-menu-open .hdr__burger i:first-child {
+    top: 16.5px;
+    transform: rotate(45deg);
+  }
+  .is-menu-open .hdr__burger i:last-child {
+    top: 16.5px;
+    transform: rotate(-45deg);
+  }
+  .hdr__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    pointer-events: none;
+  }
+  .hdr__progress span {
+    display: block;
+    height: 100%;
+    background: var(--c-accent);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  @media (max-width: 1023px) {
+    .hdr__inner {
+      grid-template-columns: 1fr auto;
+    }
+    .hdr__toggle-label {
+      display: none;
+    }
+    .hdr__toggle {
+      padding: 0;
+    }
+  }
+  @media (max-width: 520px) {
+    .hdr__cta {
+      display: none;
+    }
+  }
+
+  /* ── Menu ─────────────────────────────────────────────────── */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 700;
+    color: var(--fg);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .menu.is-open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .menu__bg {
+    position: absolute;
+    inset: 0;
+    background: var(--c-inverse-bg);
+    clip-path: inset(0 0 100% 0);
+  }
+  .menu__inner {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--col-gap);
+    padding-top: calc(var(--header-h) + 6vh);
+    padding-bottom: 5vh;
+    overflow-y: auto;
+  }
+  .menu__pages ol {
+    display: grid;
+    gap: 0;
+  }
+  .menu__item {
+    overflow: clip;
+    border-bottom: 1px solid var(--line);
+  }
+  .menu__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.5rem 1fr auto;
+    align-items: baseline;
+    padding: 0.18em 0 0.12em;
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    font-size: clamp(2.2rem, 5.4vw, 5.2rem);
+    line-height: 1.02;
+  }
+  .menu__num {
+    font-size: var(--fs-micro);
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    align-self: center;
+  }
+  .menu__label {
+    display: inline-block;
+    transition: transform 0.6s var(--ease-out), color 0.3s;
+  }
+  .menu__link:hover .menu__label,
+  .menu__link:focus-visible .menu__label {
+    transform: translateX(0.35em);
+    color: var(--c-accent);
+  }
+  .menu__link[aria-current='page'] .menu__num {
+    color: var(--c-accent);
+  }
+  .menu__desc {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    letter-spacing: 0;
+    color: var(--muted);
+    max-width: 22ch;
+    text-align: right;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.4s, transform 0.6s var(--ease-out);
+  }
+  .menu__link:hover .menu__desc {
+    opacity: 1;
+    transform: none;
+  }
+  .menu__aside {
+    display: grid;
+    align-content: start;
+    gap: 40px;
+    padding-left: clamp(0px, 4vw, 80px);
+  }
+  .menu__block {
+    display: grid;
+    gap: 10px;
+  }
+  .menu__sections {
+    display: grid;
+    gap: 6px;
+    font-size: 0.95rem;
+  }
+  .menu__sections a:hover {
+    color: var(--c-accent);
+  }
+  .menu__contact {
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+  .menu__contact:hover {
+    color: var(--c-accent);
+  }
+  .menu__small {
+    font-size: 0.875rem;
+    max-width: 34ch;
+  }
+  .menu__extras {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+  }
+  .menu__social {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .menu__social a:hover {
+    color: var(--c-accent);
+  }
+  @media (max-width: 900px) {
+    .menu__inner {
+      grid-template-columns: 1fr;
+      align-content: start;
+      gap: 48px;
+    }
+    .menu__link {
+      grid-template-columns: 2.4rem 1fr;
+      font-size: clamp(2.2rem, 10vw, 3.4rem);
+    }
+    .menu__desc {
+      display: none;
+    }
+    .menu__aside {
+      padding-left: 0;
+    }
+  }
+
+  /* ── Section index ─────────────────────────────────────────── */
+  .sindex {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    z-index: 600;
+    transform: translateY(-50%);
+    color: var(--c-ink);
+    transition: color 0.4s, opacity 0.4s;
+    display: none;
+  }
+  .sindex.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sindex.is-dark {
+    color: var(--c-inverse-ink);
+  }
+  @media (min-width: 1360px) {
+    .sindex {
+      display: block;
+    }
+  }
+  .sindex ol {
+    display: grid;
+    gap: 2px;
+  }
+  .sindex a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    height: 20px;
+  }
+  .sindex__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateX(6px);
+    transition: opacity 0.3s, transform 0.5s var(--ease-out);
+    white-space: nowrap;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--c-bg) 80%, transparent);
+    color: var(--c-ink);
+    backdrop-filter: blur(8px);
+  }
+  .sindex__num {
+    display: none;
+  }
+  .sindex__tick {
+    width: 14px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.35;
+    transform-origin: right;
+    transition: transform 0.5s var(--ease-out), opacity 0.3s, background-color 0.3s;
+  }
+  .sindex a:hover .sindex__label,
+  .sindex a:focus-visible .sindex__label {
+    opacity: 1;
+    transform: none;
+  }
+  .sindex a.is-active .sindex__tick {
+    transform: scaleX(2);
+    opacity: 1;
+    background: var(--c-accent);
+  }
+  .sindex a.is-active .sindex__num {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  import { initHeader } from '../scripts/header';
+  initHeader();
+</script>

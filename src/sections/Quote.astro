@@ -1,0 +1,174 @@
+---
+/**
+ * Quote request — no backend, no freight calculation. The data is turned into
+ * a message sent through WhatsApp and/or e-mail (mailto:). Nothing is stored.
+ */
+import Section from '../components/Section.astro';
+import Icon from '../components/Icon.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+const q = site.integrations.quote!;
+const wa = site.integrations.whatsapp;
+const channels = q.channels.filter((ch) => (ch === 'whatsapp' ? !!wa?.number : !!q.email));
+const cargoTypes = q.cargoTypes.length ? q.cargoTypes : ['Carga geral', 'Carga especial', 'Contêiner'];
+const uid = section.anchor;
+---
+<Section section={section} class="qt">
+  <div class="container qt__grid">
+    <div class="qt__head">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      <h2 class="h1" data-reveal="lines">{c.title}</h2>
+      {c.lead && <p class="lead" data-reveal="fade">{c.lead}</p>}
+      <ol class="qt__steps mono" aria-hidden="true" data-qt-steps>
+        <li data-step="1">01 Carga</li><li data-step="2">02 Rota</li><li data-step="3">03 Detalhes</li><li data-step="4">04 Contato</li>
+      </ol>
+      <div class="qt__preview" data-reveal="fade">
+        <p class="mono muted">Prévia da mensagem</p>
+        <pre data-qt-preview aria-live="off">Preencha o formulário para gerar a mensagem.</pre>
+      </div>
+    </div>
+
+    <form class="qt__form" data-qt-form novalidate data-wa={wa?.number} data-email={q.email} data-subject={q.subject} data-brand={site.brand.name}>
+      <fieldset class="qt__group" data-group="1">
+        <legend class="qt__legend"><span class="mono accent">01</span> Tipo de carga *</legend>
+        <div class="qt__chips" role="radiogroup">
+          {cargoTypes.map((t, i) => (
+            <label class="qt__chip"><input type="radio" name="cargo" value={t} required={i === 0} /><span>{t}</span></label>
+          ))}
+        </div>
+        <p class="field__error" data-error-for="cargo" aria-live="polite"></p>
+      </fieldset>
+
+      <fieldset class="qt__group" data-group="2">
+        <legend class="qt__legend"><span class="mono accent">02</span> Rota</legend>
+        <div class="qt__row">
+          <label class="field"><span class="field__label">Origem *</span><input class="field__input" name="origin" required placeholder="Cidade / UF" autocomplete="address-level2" /><span class="field__error" data-error-for="origin" aria-live="polite"></span></label>
+          <span class="qt__arrow" aria-hidden="true"><Icon name="arrow" size={20} /></span>
+          <label class="field"><span class="field__label">Destino *</span><input class="field__input" name="destination" required placeholder="Cidade / UF" /><span class="field__error" data-error-for="destination" aria-live="polite"></span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="qt__group" data-group="3">
+        <legend class="qt__legend"><span class="mono accent">03</span> Detalhes da operação</legend>
+        <div class="qt__row qt__row--3">
+          <label class="field"><span class="field__label">Peso estimado</span><input class="field__input" name="weight" placeholder="ex.: 12 t" /></label>
+          <label class="field"><span class="field__label">Volume / paletes</span><input class="field__input" name="volume" placeholder="ex.: 24 paletes" /></label>
+          <label class="field"><span class="field__label">Frequência</span>
+            <select class="field__input" name="frequency"><option value="">Selecione</option><option>Pontual</option><option>Semanal</option><option>Mensal</option><option>Contrato dedicado</option></select>
+          </label>
+        </div>
+        <label class="field"><span class="field__label">Data prevista</span><input class="field__input" name="date" type="date" /></label>
+      </fieldset>
+
+      <fieldset class="qt__group" data-group="4">
+        <legend class="qt__legend"><span class="mono accent">04</span> Contato</legend>
+        <div class="qt__row">
+          <label class="field"><span class="field__label">Nome *</span><input class="field__input" name="name" required autocomplete="name" /><span class="field__error" data-error-for="name" aria-live="polite"></span></label>
+          <label class="field"><span class="field__label">Empresa</span><input class="field__input" name="company" autocomplete="organization" /></label>
+        </div>
+        <div class="qt__row">
+          <label class="field"><span class="field__label">E-mail</span><input class="field__input" name="email" type="email" autocomplete="email" /></label>
+          <label class="field"><span class="field__label">Telefone</span><input class="field__input" name="phone" type="tel" autocomplete="tel" /></label>
+        </div>
+        <p class="field__error" data-error-for="contact" aria-live="polite"></p>
+        <label class="field"><span class="field__label">Observações</span><textarea class="field__input" name="notes" rows="3" placeholder="Dimensões, restrições de horário, necessidade de escolta…"></textarea></label>
+      </fieldset>
+
+      <div class="qt__submit">
+        {channels.includes('whatsapp') && <button class="btn btn--accent" type="submit" value="whatsapp" data-magnetic><Icon name="whatsapp" class="btn__icon" /><span>Enviar pelo WhatsApp</span></button>}
+        {channels.includes('email') && <button class="btn btn--ghost" type="submit" value="email"><Icon name="mail" class="btn__icon" /><span>Enviar por e-mail</span></button>}
+      </div>
+      <p class="qt__legal mono muted">Os dados não são armazenados neste site: eles são usados apenas para montar a mensagem enviada pelo canal escolhido. Valores de frete são informados por um especialista.</p>
+      <p class="qt__status" role="status" aria-live="polite" data-qt-status></p>
+    </form>
+  </div>
+</Section>
+<style>
+  .qt__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); }
+  .qt__head { grid-column: 1 / span 5; display: grid; gap: 24px; align-content: start; position: sticky; top: calc(var(--header-h) + 32px); align-self: start; }
+  .qt__steps { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); margin-top: 16px; }
+  .qt__steps li { position: relative; padding-left: 14px; transition: color 0.3s; }
+  .qt__steps li::before { content: ''; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; margin-top: -3px; border: 1px solid currentColor; }
+  .qt__steps li.is-done { color: var(--fg); }
+  .qt__steps li.is-done::before { background: var(--accent); border-color: var(--accent); }
+  .qt__preview { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 8px; }
+  .qt__preview pre { font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.6; color: var(--fg-soft); white-space: pre-wrap; max-height: 220px; overflow: auto; }
+  .qt__form { grid-column: 7 / -1; display: grid; gap: clamp(40px, 5vw, 64px); }
+  .qt__group { border: 0; padding: 0; min-width: 0; display: grid; gap: 18px; }
+  .qt__legend { font-family: var(--font-display); font-size: var(--fs-h4); font-weight: 500; letter-spacing: -0.02em; padding: 0 0 14px; border-bottom: 1px solid var(--fg); width: 100%; display: flex; gap: 14px; align-items: baseline; }
+  .qt__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .qt__chip { position: relative; cursor: pointer; }
+  .qt__chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .qt__chip span { display: inline-block; padding: 10px 16px; border-radius: var(--r-btn); box-shadow: inset 0 0 0 1px var(--line); font-size: 0.9375rem; transition: background-color 0.3s, color 0.3s, box-shadow 0.3s; }
+  .qt__chip:hover span { box-shadow: inset 0 0 0 1px var(--fg); }
+  .qt__chip input:checked + span { background: var(--fg); color: var(--bg); box-shadow: none; }
+  .qt__chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .qt__row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: end; }
+  .qt__row:has(.qt__arrow) { grid-template-columns: 1fr auto 1fr; }
+  .qt__row--3 { grid-template-columns: repeat(3, 1fr); }
+  .qt__arrow { padding-bottom: 18px; color: var(--accent); }
+  .qt__form select.field__input { appearance: none; background: transparent; cursor: pointer; }
+  .qt__form select option { color: #111; }
+  .qt__submit { display: flex; flex-wrap: wrap; gap: 10px; }
+  .qt__legal { font-size: 0.625rem; max-width: 70ch; margin-top: -32px; }
+  .qt__status { font-size: 0.9375rem; color: var(--accent); }
+  @media (max-width: 1023px) { .qt__head, .qt__form { grid-column: 1 / -1; position: static; } .qt__form { margin-top: 32px; } .qt__preview { display: none; } }
+  @media (max-width: 640px) { .qt__row, .qt__row--3, .qt__row:has(.qt__arrow) { grid-template-columns: 1fr; } .qt__arrow { display: none; } }
+</style>
+<script>
+  import { buildMessage, whatsappUrl, mailtoUrl } from '../lib/messages';
+  document.querySelectorAll<HTMLFormElement>('[data-qt-form]').forEach((form) => {
+    const sec = form.closest('section')!;
+    const preview = sec.querySelector<HTMLElement>('[data-qt-preview]');
+    const steps = sec.querySelectorAll<HTMLElement>('[data-qt-steps] li');
+    const status = form.querySelector<HTMLElement>('[data-qt-status]')!;
+    const title = `Solicitação de cotação — ${form.dataset.brand}`;
+    const read = () => {
+      const fd = new FormData(form);
+      const order = ['name', 'company', 'email', 'phone', 'cargo', 'origin', 'destination', 'weight', 'volume', 'frequency', 'date', 'notes'];
+      const data: Record<string, string> = {};
+      order.forEach((k) => { const v = fd.get(k); if (typeof v === 'string') data[k] = k === 'date' && v ? new Date(v + 'T12:00').toLocaleDateString(document.documentElement.lang) : v; });
+      return data;
+    };
+    const err = (key: string, msg: string) => {
+      const el = form.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+      if (el) el.textContent = msg;
+      el?.closest('.field')?.toggleAttribute('data-invalid', !!msg);
+    };
+    const update = () => {
+      const d = read();
+      if (preview) preview.textContent = buildMessage(title, d);
+      const done = [!!d.cargo, !!(d.origin && d.destination), !!(d.weight || d.volume || d.frequency || d.date), !!(d.name && (d.email || d.phone))];
+      steps.forEach((s, i) => s.classList.toggle('is-done', done[i]));
+    };
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const channel = ((e as SubmitEvent).submitter as HTMLButtonElement | null)?.value ?? 'whatsapp';
+      const d = read();
+      let first: HTMLElement | null = null;
+      const need = (key: string, ok: boolean, msg: string, focusName = key) => {
+        err(key, ok ? '' : msg);
+        if (!ok && !first) first = form.querySelector<HTMLElement>(`[name="${focusName}"]`);
+      };
+      need('cargo', !!d.cargo, 'Selecione o tipo de carga.');
+      need('origin', !!d.origin?.trim(), 'Informe a origem.');
+      need('destination', !!d.destination?.trim(), 'Informe o destino.');
+      need('name', !!d.name?.trim(), 'Informe seu nome.');
+      const emailOk = !d.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email);
+      need('contact', !!(d.email || d.phone) && emailOk, emailOk ? 'Informe e-mail ou telefone para retorno.' : 'E-mail inválido.', d.email ? 'email' : 'phone');
+      if (first) { (first as HTMLElement).focus(); status.textContent = ''; return; }
+      const text = buildMessage(title, d);
+      if (channel === 'email') {
+        window.location.href = mailtoUrl(form.dataset.email!, form.dataset.subject!, text);
+        status.textContent = 'Abrindo seu aplicativo de e-mail…';
+      } else {
+        window.open(whatsappUrl(form.dataset.wa!, text), '_blank', 'noopener');
+        status.textContent = 'Abrindo o WhatsApp em uma nova aba…';
+      }
+    });
+  });
+</script>

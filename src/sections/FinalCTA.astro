@@ -1,0 +1,37 @@
+---
+/** Final cinematic CTA — monumental type with a route line drawn on scroll. */
+import Section from '../components/Section.astro';
+import Button from '../components/Button.astro';
+import { lines, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+---
+<Section section={section} class="fc">
+  <svg class="fc__route" viewBox="0 0 1600 400" preserveAspectRatio="none" aria-hidden="true">
+    <path data-fc-path d="M-20 330 C 260 330, 340 120, 620 140 S 980 320, 1200 220 S 1480 60, 1620 80" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+    <path d="M-20 330 C 260 330, 340 120, 620 140 S 980 320, 1200 220 S 1480 60, 1620 80" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="1" stroke-dasharray="2 6" vector-effect="non-scaling-stroke" />
+  </svg>
+  <div class="container fc__inner">
+    <h2 class="mega fc__title" data-reveal="lines">{lines(c.title).map((l) => <span class="line-break">{l}</span>)}</h2>
+    <div class="fc__actions" data-reveal="fade" data-delay="0.2">
+      {c.cta && <Button href={c.cta.href} label={c.cta.label} variant="accent" anchors={anchors} />}
+      {c.secondaryCta && <Button href={c.secondaryCta.href} label={c.secondaryCta.label} variant="ghost" anchors={anchors} />}
+    </div>
+  </div>
+</Section>
+<style>
+  .fc { overflow: clip; }
+  .fc__route { position: absolute; inset: 10% 0 auto; width: 100%; height: 60%; color: var(--fg); }
+  .fc__inner { position: relative; display: grid; gap: clamp(32px, 4vw, 56px); }
+  .fc__title { font-size: clamp(3rem, 9vw, 10rem); max-width: 14ch; }
+  .fc__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
+<script>
+  import { gsap, motionEnabled } from '../scripts/motion/core';
+  document.querySelectorAll<SVGPathElement>('[data-fc-path]').forEach((p) => {
+    if (!motionEnabled()) return;
+    const len = p.getTotalLength();
+    gsap.fromTo(p, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: p.closest('section'), start: 'top 80%', end: 'center 40%', scrub: true } });
+  });
+</script>

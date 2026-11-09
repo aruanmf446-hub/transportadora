@@ -1,0 +1,67 @@
+---
+/** Timeline — horizontal pinned scroll on desktop, vertical list on mobile. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const items = site.data.timeline;
+---
+<Section section={section} class="hs">
+  <div class="container"><SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} /></div>
+  <div class="hs__pin" data-hs-pin>
+    <div class="hs__progress container" aria-hidden="true"><span class="hs__line"><i data-hs-progress></i></span></div>
+    <ol class="hs__track" data-hs-track>
+      {items.map((it) => (
+        <li class="hs__item">
+          <span class="hs__year">{it.year}</span>
+          <div class="hs__card">
+            {it.image && <div class="hs__img media"><Img image={it.image} sizes="(min-width: 1024px) 28vw, 80vw" widths={[480, 800, 1200]} /></div>}
+            <h3 class="h3">{it.title}</h3>
+            <p class="muted">{it.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>
+<style>
+  .hs { overflow: clip; }
+  .hs__progress { margin-bottom: 32px; }
+  .hs__line { display: block; height: 1px; background: var(--line); position: relative; }
+  .hs__line i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  .hs__track { display: flex; gap: clamp(24px, 4vw, 72px); padding-inline: var(--gutter); width: max-content; }
+  .hs__item { width: clamp(280px, 30vw, 480px); display: grid; gap: 18px; align-content: start; }
+  .hs__year { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -0.06em; font-size: clamp(4rem, 9vw, 9rem); line-height: 0.85; color: transparent; -webkit-text-stroke: 1px var(--fg); }
+  .hs__item:hover .hs__year { color: var(--accent); -webkit-text-stroke-color: var(--accent); }
+  .hs__year { transition: color 0.4s; }
+  .hs__card { display: grid; gap: 12px; }
+  .hs__img { aspect-ratio: 16 / 10; margin-bottom: 8px; }
+  @media (max-width: 900px) {
+    .hs__track { flex-direction: column; width: auto; }
+    .hs__item { width: auto; }
+    .hs__progress { display: none; }
+  }
+</style>
+<script>
+  import { gsap, motionEnabled } from '../scripts/motion/core';
+  const pin = document.querySelector<HTMLElement>('[data-hs-pin]');
+  const track = pin?.querySelector<HTMLElement>('[data-hs-track]');
+  if (pin && track && motionEnabled()) {
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 901px)', () => {
+      const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
+      gsap.to(track, {
+        x: () => -dist(),
+        ease: 'none',
+        scrollTrigger: { trigger: pin, start: 'center center', end: () => `+=${dist()}`, pin: true, scrub: 0.8, invalidateOnRefresh: true, anticipatePin: 1 },
+      });
+      gsap.to(pin.querySelector('[data-hs-progress]'), { scaleX: 1, ease: 'none', scrollTrigger: { trigger: pin, start: 'center center', end: () => `+=${dist()}`, scrub: true, invalidateOnRefresh: true } });
+    });
+    mm.add('(max-width: 900px)', () => {
+      track.querySelectorAll('.hs__item').forEach((it) => gsap.from(it, { y: 40, autoAlpha: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: it, start: 'top 85%', once: true } }));
+    });
+  }
+</script>

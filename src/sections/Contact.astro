@@ -1,0 +1,59 @@
+---
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Icon from '../components/Icon.astro';
+import { site, pad, mapsLink, directionsLink, whatsappLink, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const { company, integrations } = site;
+const tel = (p: string) => `tel:${p.replace(/[^\d+]/g, '')}`;
+---
+<Section section={section} class="co">
+  <div class="container">
+    <div class="co__channels" data-reveal="stagger">
+      <a href={`mailto:${company.contact.email}`} class="co__channel"><span class="mono muted">E-mail</span><span class="h3">{company.contact.email}</span><Icon name="mail" /></a>
+      <a href={tel(company.contact.phone)} class="co__channel"><span class="mono muted">Telefone</span><span class="h3">{company.contact.phone}</span><Icon name="phone" /></a>
+      {integrations.whatsapp?.enabled && <a href={whatsappLink(integrations.whatsapp.greeting)} target="_blank" rel="noopener noreferrer" class="co__channel"><span class="mono muted">WhatsApp</span><span class="h3">Conversar agora</span><Icon name="whatsapp" /></a>}
+    </div>
+    {company.contact.hours && <p class="mono muted co__hours">{company.contact.hours}</p>}
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    <ol class="co__units">
+      {company.units.map((u, i) => (
+        <li class="co__unit" data-reveal="fade" data-delay={String((i % 3) * 0.06)}>
+          <div class="co__utop"><span class="mono muted">{pad(i + 1)}</span>{u.hq && <span class="co__hq mono">Matriz</span>}</div>
+          <h3 class="h4">{u.name}</h3>
+          <p class="mono muted">{u.kind}</p>
+          <address class="co__addr">{u.address}</address>
+          <ul class="co__meta">
+            {u.phone && <li><a href={tel(u.phone)}>{u.phone}</a></li>}
+            {u.email && <li><a href={`mailto:${u.email}`}>{u.email}</a></li>}
+            {u.hours && <li class="muted">{u.hours}</li>}
+          </ul>
+          <div class="co__links">
+            <a class="link" href={mapsLink(u.address, u.mapsUrl)} target="_blank" rel="noopener noreferrer">Ver no mapa</a>
+            <a class="link" href={directionsLink(u.address)} target="_blank" rel="noopener noreferrer">Como chegar</a>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>
+<style>
+  .co__channels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--fg); margin-bottom: 16px; }
+  .co__channel { position: relative; display: grid; gap: 10px; padding: 28px 48px 28px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; transition: color 0.3s; }
+  .co__channel + .co__channel { padding-left: 24px; border-left: 1px solid var(--line); }
+  .co__channel :global(svg) { position: absolute; right: 16px; top: 30px; }
+  .co__channel:hover { color: var(--accent); }
+  .co__channel .h3 { font-size: clamp(1.1rem, 1.8vw, 1.7rem); }
+  .co__hours { margin-bottom: var(--section-y-sm); }
+  .co__units { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(32px, 4vw, 56px) var(--col-gap); }
+  .co__unit { display: grid; gap: 10px; align-content: start; padding-top: 16px; border-top: 1px solid var(--line); }
+  .co__utop { display: flex; justify-content: space-between; }
+  .co__hq { padding: 2px 8px; background: var(--accent); color: var(--on-accent); border-radius: 99px; }
+  .co__addr { font-style: normal; color: var(--fg-soft); font-size: 0.9375rem; }
+  .co__meta { display: grid; gap: 2px; font-size: 0.9375rem; }
+  .co__meta a:hover { color: var(--accent); }
+  .co__links { display: flex; gap: 20px; margin-top: 8px; font-size: 0.875rem; }
+  @media (max-width: 900px) { .co__channels, .co__units { grid-template-columns: 1fr; } .co__channel + .co__channel { padding-left: 0; border-left: 0; } }
+</style>

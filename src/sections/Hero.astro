@@ -1,0 +1,180 @@
+---
+/**
+ * Cinematic hero — three interchangeable modes via `hero.mode` in the config:
+ *   "3d"    → interactive WebGL vehicle (procedural or client GLB)
+ *   "video" → cinematic loop (mp4/webm + poster)
+ *   "image" → editorial photograph
+ * 3D always ships a poster image fallback (no WebGL, save-data, reduced motion).
+ */
+import Section from '../components/Section.astro';
+import Button from '../components/Button.astro';
+import Img from '../components/Img.astro';
+import { site, lines, type ResolvedSection } from '../lib/site';
+
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const { hero, scene3d, company, data } = site;
+const mode = (section.content.options?.mode as typeof hero.mode) ?? hero.mode;
+const use3d = mode === '3d' && scene3d.enabled;
+const fallback = hero.fallbackImage ?? hero.image;
+const hq = company.units.find((u) => u.hq) ?? company.units[0];
+const coord = (v?: number, pos = 'N', neg = 'S') => (v === undefined ? '' : `${Math.abs(v).toFixed(2)}° ${v >= 0 ? pos : neg}`);
+const ticker = data.services.map((s) => s.title);
+const truckCfg = JSON.stringify({ ...scene3d.truck, palette: undefined });
+const titleLines = lines(c.title ?? site.brand.tagline);
+---
+<Section section={section} class:list={['hero', `hero--${mode}`]} flush>
+  <div class="hero__media" aria-hidden={use3d ? 'true' : undefined}>
+    {use3d && (
+      <div class="hero__stage" data-hero-stage data-truck={truckCfg} data-mobile={scene3d.mobileQuality}>
+        {fallback && <div class="hero__poster" data-hero-poster><Img image={fallback} loading="eager" fetchpriority="high" sizes="100vw" /></div>}
+      </div>
+    )}
+    {mode === 'video' && hero.video && (
+      <div class="hero__video" data-reveal="mask" data-immediate data-delay="0.4">
+        <video autoplay muted loop playsinline preload="metadata" poster={hero.video.poster} data-hero-video>
+          {hero.video.srcWebm && <source src={hero.video.srcWebm} type="video/webm" />}
+          <source src={hero.video.src} type="video/mp4" />
+        </video>
+        <button class="hero__vbtn mono" type="button" data-video-toggle aria-label="Pausar vídeo">Pausar</button>
+      </div>
+    )}
+    {(mode === 'image' || (mode === 'video' && !hero.video)) && hero.image && (
+      <div class="hero__image" data-reveal="mask" data-immediate data-delay="0.4">
+        <div class="media__inner" data-parallax="0.12"><Img image={hero.image} loading="eager" fetchpriority="high" sizes="100vw" /></div>
+      </div>
+    )}
+  </div>
+
+  <div class="hero__ui container">
+    <div class="hero__meta mono" data-hero-meta>
+      <span>{hq ? `Sede · ${hq.city}${hq.state ? '/' + hq.state : ''}` : site.brand.name}</span>
+      {hq?.lat !== undefined && <span class="only-desktop">{coord(hq.lat)} / {coord(hq.lon, 'L', 'O')}</span>}
+      <span>Est. {company.foundedYear}</span>
+    </div>
+
+    <div class="hero__content">
+      {c.eyebrow && <p class="eyebrow hero__eyebrow" data-reveal="fade" data-immediate data-delay="0.9">{c.eyebrow}</p>}
+      <h1 class="mega hero__title" data-reveal="chars" data-immediate data-delay="0.55">
+        {titleLines.map((l, i) => <span class:list={['line-break', i === titleLines.length - 1 && 'hero__title-last']}>{l}</span>)}
+      </h1>
+      <div class="hero__bottom">
+        {c.lead && <p class="lead hero__lead" data-reveal="fade" data-immediate data-delay="1.2">{c.lead}</p>}
+        <div class="hero__ctas" data-reveal="fade" data-immediate data-delay="1.35">
+          {c.cta && <Button href={c.cta.href} label={c.cta.label} variant="accent" anchors={anchors} />}
+          {c.secondaryCta && <Button href={c.secondaryCta.href} label={c.secondaryCta.label} variant="ghost" anchors={anchors} />}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {ticker.length > 0 && (
+    <div class="hero__ticker" aria-hidden="true">
+      <div class="hero__ticker-track">
+        {[0, 1].map(() => (
+          <div class="hero__ticker-group">
+            {ticker.map((t) => (<><span>{t}</span><i class="cross"></i></>))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+  <div class="hero__scroll mono" aria-hidden="true"><span>Role</span><i></i></div>
+</Section>
+
+<style>
+  .hero { min-height: 100svh; min-height: max(100svh, 640px); display: grid; grid-template-rows: 1fr auto; overflow: clip; isolation: isolate; }
+  .hero__media { position: absolute; inset: 0; z-index: -1; }
+  .hero__stage { position: absolute; inset: 0; }
+  .hero__stage :global(.stage-canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 1.2s var(--ease-out); }
+  .hero__stage:global(.is-ready) :global(.stage-canvas) { opacity: 1; }
+  .hero__poster { position: absolute; inset: 0; transition: opacity 1s var(--ease-out); }
+  .hero__poster :global(img), .hero__poster :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  .hero__stage:global(.is-ready) .hero__poster { opacity: 0; pointer-events: none; }
+  .hero__video, .hero__image { position: absolute; inset: 0; overflow: hidden; }
+  .hero__video video, .hero__image :global(img), .hero__image :global(picture), .media__inner { width: 100%; height: 100%; object-fit: cover; }
+  .media__inner { position: absolute; inset: -6% 0; }
+  .hero--video .hero__media::after, .hero--image .hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--c-inverse-bg) 30%, transparent), transparent 35%, transparent 55%, color-mix(in srgb, var(--c-inverse-bg) 70%, transparent)); }
+  .hero--video, .hero--image { --fg: var(--c-inverse-ink); --fg-soft: color-mix(in srgb, var(--c-inverse-ink) 85%, transparent); --muted: color-mix(in srgb, var(--c-inverse-ink) 70%, transparent); --line: color-mix(in srgb, var(--c-inverse-ink) 30%, transparent); background: var(--c-inverse-bg); }
+  .hero__vbtn { position: absolute; right: var(--gutter); bottom: 90px; z-index: 2; color: var(--c-inverse-ink); padding: 6px 12px; border-radius: 99px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-inverse-ink) 40%, transparent); }
+
+  .hero__ui { position: relative; display: grid; grid-template-rows: auto 1fr; padding-top: calc(var(--header-h) + 28px); padding-bottom: clamp(24px, 4vw, 48px); pointer-events: none; }
+  .hero__ui :global(a), .hero__ui :global(button) { pointer-events: auto; }
+  .hero__meta { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+  .hero__content { align-self: end; display: grid; gap: clamp(18px, 2.2vw, 32px); }
+  .hero__title { max-width: 11ch; }
+  .hero__title-last { color: var(--fg); }
+  .hero__bottom { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 24px 48px; }
+  .hero__lead { max-width: 34ch; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .hero__ticker { position: relative; border-top: 1px solid var(--line); overflow: hidden; padding-block: 14px; font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .hero__ticker-track { display: flex; width: max-content; animation: ticker 48s linear infinite; }
+  .hero__ticker-group { display: flex; align-items: center; gap: 28px; padding-right: 28px; }
+  .hero__ticker-group .cross { width: 9px; height: 9px; color: var(--accent); }
+  .hero__ticker-group .cross::before { left: 4px; height: 9px; }
+  .hero__ticker-group .cross::after { top: 4px; width: 9px; }
+  @keyframes ticker { to { transform: translateX(-50%); } }
+  .hero__scroll { position: absolute; right: var(--gutter); bottom: 64px; display: none; align-items: center; gap: 10px; color: var(--muted); writing-mode: vertical-rl; }
+  .hero__scroll i { width: 1px; height: 56px; background: var(--line); position: relative; overflow: hidden; }
+  .hero__scroll i::after { content: ''; position: absolute; inset: 0; background: var(--fg); transform: translateY(-100%); animation: scrollcue 2.4s var(--ease-in-out) infinite; }
+  @keyframes scrollcue { 50% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+  @media (min-width: 1024px) { .hero__scroll { display: flex; } }
+  @media (max-width: 760px) {
+    .hero--3d .hero__content { padding-top: 46vh; }
+    .hero--3d .hero__media { bottom: 30%; }
+  }
+  .hero :global(.stage-labels) { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .hero :global(.stage-label) { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--fg); padding: 3px 7px; background: color-mix(in srgb, var(--c-bg) 82%, transparent); border-radius: 2px; translate: -50% -50%; white-space: nowrap; transition: opacity 0.4s; }
+  .hero :global(.stage-label--tag) { background: var(--c-ink); color: var(--c-bg); }
+  @media (max-width: 760px) { .hero :global(.stage-label) { display: none; } }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, motionEnabled } from '../scripts/motion/core';
+  import { decideQuality } from '../scripts/three/stage';
+
+  const hero = document.querySelector<HTMLElement>('.sec-hero');
+  const stageEl = hero?.querySelector<HTMLElement>('[data-hero-stage]');
+  const animate = motionEnabled();
+
+  if (hero && animate) {
+    gsap.from(hero.querySelector('[data-hero-meta]'), { autoAlpha: 0, y: -10, duration: 1, ease: 'power3.out', delay: 0.5 });
+    gsap.to(hero.querySelector('.hero__content'), {
+      yPercent: -18,
+      autoAlpha: 0.2,
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+    });
+  }
+
+  if (stageEl) {
+    const quality = decideQuality((stageEl.dataset.mobile as 'off' | 'low' | 'full') ?? 'low');
+    if (quality) {
+      import('../scripts/three/scenes/hero').then(async ({ mountHero }) => {
+        const ctrl = await mountHero(stageEl, quality, { animate });
+        if (animate) {
+          ctrl.intro();
+          ScrollTrigger.create({
+            trigger: hero,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+            onUpdate: (st) => ctrl.setScroll(st.progress),
+          });
+        }
+      }).catch((e) => console.warn('[hero] 3D unavailable, poster kept', e));
+    }
+  }
+
+  const video = hero?.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const vbtn = hero?.querySelector<HTMLButtonElement>('[data-video-toggle]');
+  if (video && vbtn) {
+    if (!animate) { video.pause(); video.removeAttribute('autoplay'); vbtn.textContent = 'Reproduzir'; }
+    vbtn.addEventListener('click', () => {
+      if (video.paused) { video.play(); vbtn.textContent = 'Pausar'; vbtn.setAttribute('aria-label', 'Pausar vídeo'); }
+      else { video.pause(); vbtn.textContent = 'Reproduzir'; vbtn.setAttribute('aria-label', 'Reproduzir vídeo'); }
+    });
+  }
+</script>

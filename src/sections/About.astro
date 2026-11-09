@@ -1,0 +1,48 @@
+---
+import Section from '../components/Section.astro';
+import Img from '../components/Img.astro';
+import Button from '../components/Button.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const paragraphs = (c.body ?? site.brand.description).split('\n\n');
+const years = new Date().getFullYear() - site.company.foundedYear;
+---
+<Section section={section} class="ab">
+  <div class="container ab__grid">
+    <div class="ab__head">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      <h2 class="h1 ab__title" data-reveal="lines">{c.title}</h2>
+    </div>
+    <div class="ab__media media" data-reveal="mask">
+      {c.image && <div class="ab__inner" data-parallax="0.16"><Img image={c.image} sizes="(min-width: 1024px) 40vw, 100vw" /></div>}
+      <div class="ab__stamp" aria-hidden="true"><span class="mono">Desde</span><strong>{site.company.foundedYear}</strong><span class="mono">{years} anos</span></div>
+    </div>
+    <div class="ab__body body" data-reveal="fade">
+      {paragraphs.map((p) => <p>{p}</p>)}
+      {c.cta && <Button href={c.cta.href} label={c.cta.label} variant="ghost" anchors={anchors} />}
+    </div>
+    {c.items && (
+      <ol class="ab__items" data-reveal="stagger">
+        {c.items.map((it, i) => (
+          <li><span class="mono muted">{pad(i + 1)}</span><h3 class="h3">{it.title}</h3>{it.text && <p class="muted">{it.text}</p>}</li>
+        ))}
+      </ol>
+    )}
+  </div>
+</Section>
+<style>
+  .ab__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); row-gap: clamp(40px, 5vw, 80px); }
+  .ab__head { grid-column: 1 / span 7; display: grid; gap: 24px; align-content: start; }
+  .ab__title { max-width: 14ch; }
+  .ab__media { grid-column: 8 / -1; grid-row: span 2; aspect-ratio: 3 / 4; align-self: start; }
+  .ab__inner { position: absolute; inset: -10% 0; }
+  .ab__stamp { position: absolute; left: 16px; bottom: 16px; display: grid; padding: 14px 16px; background: var(--c-bg); color: var(--c-ink); border-radius: var(--r-s); line-height: 1.1; }
+  .ab__stamp strong { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 2.6rem; letter-spacing: -0.05em; }
+  .ab__body { grid-column: 3 / span 5; display: grid; gap: 1em; font-size: 1.0625rem; }
+  .ab__items { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+  .ab__items li { display: grid; gap: 10px; padding: 24px 24px 0 0; }
+  .ab__items li + li { padding-left: 24px; border-left: 1px solid var(--line); }
+  @media (max-width: 1023px) { .ab__head, .ab__media, .ab__body { grid-column: 1 / -1; grid-row: auto; } .ab__media { aspect-ratio: 4 / 3; } .ab__items { grid-template-columns: 1fr; } .ab__items li + li { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); margin-top: 24px; } }
+</style>

@@ -1,0 +1,172 @@
+---
+/** Interactive 3D vehicle (configurator). Optional, with image fallback. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import Icon from '../components/Icon.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const { scene3d, data } = site;
+const defaults = [
+  { key: 'cab', title: 'Cabine leito', text: 'Cabine avançada com teto alto, climatização e isolamento acústico para jornadas longas com descanso adequado.' },
+  { key: 'lights', title: 'Iluminação LED', text: 'Faróis e luzes diurnas em LED para maior visibilidade e menor consumo de energia.' },
+  { key: 'mirrors', title: 'Retrovisores', text: 'Conjunto de espelhos amplos para reduzir pontos cegos em manobras e trânsito urbano.' },
+  { key: 'wheels', title: 'Rodado & freios', text: 'Eixos com pneus de baixa resistência ao rolamento e manutenção preditiva por telemetria.' },
+  { key: 'skirts', title: 'Aerodinâmica', text: 'Saias laterais no implemento que reduzem o arrasto e o consumo em rodovias.' },
+  { key: 'rear', title: 'Implemento baú', text: 'Portas traseiras com lacre, iluminação e para-choque de proteção.' },
+];
+const hotspots = (c.items?.length ? c.items.map((it) => ({ key: it.meta ?? '', title: it.title, text: it.text })) : defaults).filter((h) => h.key);
+const palette = scene3d.truck.palette;
+const truckCfg = JSON.stringify({ ...scene3d.truck, palette: undefined });
+const fallback = data.fleet.find((f) => f.image)?.image ?? site.hero.fallbackImage;
+const compact = section.variant === 'compact';
+---
+<Section section={section} class:list={['tx', compact && 'tx--compact']}>
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+  </div>
+  <div class="tx__wrap container" data-tx>
+    <div class="tx__stage" data-tx-stage data-truck={truckCfg} data-mobile={scene3d.mobileQuality} data-hotspots={JSON.stringify(hotspots)} data-enabled={scene3d.enabled ? '1' : '0'}>
+      <div class="tx__fallback" data-tx-fallback>
+        {fallback && <Img image={fallback} sizes="100vw" />}
+        <p class="tx__fallback-note mono" data-tx-note hidden>Visualização 3D indisponível neste dispositivo — exibindo imagem.</p>
+      </div>
+      <p class="tx__hint mono" data-tx-hint aria-hidden="true"><Icon name="rotate" size={12} /> Arraste para girar</p>
+    </div>
+
+    <div class="tx__ui" data-tx-ui hidden>
+      <div class="tx__group" role="group" aria-label="Vistas da câmera">
+        <span class="tx__label mono">Vista</span>
+        {[['three', '3/4'], ['side', 'Lateral'], ['front', 'Frontal'], ['rear', 'Traseira'], ['top', 'Superior']].map(([k, l], i) => (
+          <button type="button" class:list={['tx__chip', i === 0 && 'is-on']} data-view={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>
+        ))}
+      </div>
+      {palette.length > 0 && (
+        <div class="tx__group" role="group" aria-label="Cor da cabine">
+          <span class="tx__label mono">Cabine</span>
+          {palette.map((p, i) => (
+            <button type="button" class:list={['tx__swatch', p.value.toLowerCase() === (scene3d.truck.cabColor ?? '').toLowerCase() && 'is-on']} style={`--sw:${p.value}`} data-color={p.value} aria-label={`Cor ${p.name}`} title={p.name} aria-pressed="false"></button>
+          ))}
+        </div>
+      )}
+      <div class="tx__group" role="group" aria-label="Controles">
+        <button type="button" class="tx__icon" data-rotate="-1" aria-label="Girar para a esquerda">↺</button>
+        <button type="button" class="tx__icon" data-rotate="1" aria-label="Girar para a direita">↻</button>
+        <button type="button" class="tx__icon" data-zoom="0.8" aria-label="Aproximar"><Icon name="plus" size={14} /></button>
+        <button type="button" class="tx__icon" data-zoom="1.25" aria-label="Afastar">−</button>
+        <button type="button" class="tx__chip" data-lights aria-pressed="false">Faróis</button>
+      </div>
+    </div>
+
+    <div class="tx__info" data-tx-info aria-live="polite">
+      <ol class="tx__list">
+        {hotspots.map((h, i) => (
+          <li>
+            <button type="button" class="tx__item" data-focus={h.key} aria-expanded="false">
+              <span class="mono muted">{pad(i + 1)}</span><span class="tx__item-t">{h.title}</span>
+            </button>
+            <p class="tx__item-d" data-desc={h.key} hidden>{h.text}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="tx__note mono muted">Modelo 3D ilustrativo. {scene3d.truck.model ? '' : 'Veículo procedural genérico — substituível por modelo GLB da frota.'}</p>
+    </div>
+  </div>
+</Section>
+<style>
+  .tx__wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); row-gap: 20px; }
+  .tx__stage { position: relative; grid-column: 1 / span 9; grid-row: 1 / span 2; aspect-ratio: 16 / 10; border-radius: var(--r-l); background: radial-gradient(120% 90% at 50% 40%, color-mix(in srgb, var(--bg) 70%, #fff 30%), var(--bg)); overflow: hidden; cursor: grab; box-shadow: inset 0 0 0 1px var(--line); }
+  [data-theme='dark'] .tx__stage { background: radial-gradient(120% 90% at 50% 35%, color-mix(in srgb, var(--bg) 85%, #fff 9%), var(--bg)); }
+  .tx__stage:active { cursor: grabbing; }
+  .tx__stage :global(.stage-canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 1s; }
+  .tx__stage:global(.is-ready) :global(.stage-canvas) { opacity: 1; }
+  .tx__fallback { position: absolute; inset: 0; transition: opacity 0.8s; }
+  .tx__fallback :global(img), .tx__fallback :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  .tx__stage:global(.is-ready) .tx__fallback { opacity: 0; pointer-events: none; }
+  .tx__fallback-note { position: absolute; left: 16px; bottom: 16px; padding: 4px 8px; background: var(--c-bg); color: var(--c-ink); }
+  .tx__hint { position: absolute; left: 16px; top: 16px; display: inline-flex; gap: 6px; align-items: center; color: var(--muted); opacity: 0; transition: opacity 0.6s; }
+  .tx__stage:global(.is-ready) .tx__hint { opacity: 1; }
+  .tx__ui { grid-column: 1 / span 9; display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+  .tx__ui[hidden] { display: none; }
+  .tx__group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .tx__label { color: var(--muted); margin-right: 6px; }
+  .tx__chip { height: 34px; padding: 0 14px; border-radius: var(--r-btn); font-size: 0.8125rem; box-shadow: inset 0 0 0 1px var(--line); transition: background-color 0.3s, color 0.3s; }
+  .tx__chip:hover { box-shadow: inset 0 0 0 1px var(--fg); }
+  .tx__chip.is-on, .tx__chip[aria-pressed='true'] { background: var(--fg); color: var(--bg); box-shadow: none; }
+  .tx__swatch { width: 28px; height: 28px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 25%, transparent); transition: transform 0.4s var(--ease-out); }
+  .tx__swatch.is-on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--fg); }
+  .tx__swatch:hover { transform: scale(1.12); }
+  .tx__icon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line); font-size: 1rem; }
+  .tx__icon:hover { background: var(--fg); color: var(--bg); }
+  .tx__info { grid-column: 10 / -1; grid-row: 1 / span 2; display: grid; align-content: space-between; gap: 24px; }
+  .tx__list { border-top: 1px solid var(--fg); }
+  .tx__list li { border-bottom: 1px solid var(--line); }
+  .tx__item { width: 100%; display: flex; gap: 14px; align-items: baseline; padding: 14px 0; text-align: left; transition: color 0.3s, padding 0.5s var(--ease-out); }
+  .tx__item:hover, .tx__item[aria-expanded='true'] { color: var(--accent); padding-left: 8px; }
+  .tx__item-t { font-weight: 500; }
+  .tx__item-d { font-size: 0.875rem; color: var(--fg-soft); padding: 0 0 16px 2.4rem; }
+  .tx__note { font-size: 0.625rem; }
+  .tx :global(.stage-labels) { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .tx :global(.hotspot) { pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; translate: -11px -11px; height: 22px; padding: 0 8px 0 0; border-radius: 99px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--c-ink); }
+  .tx :global(.hotspot__dot) { position: relative; width: 22px; height: 22px; border-radius: 50%; background: var(--c-accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-accent) 25%, transparent); }
+  .tx :global(.hotspot__dot::after) { content: ''; position: absolute; inset: 8px; border-radius: 50%; background: #fff; }
+  .tx :global(.hotspot__n) { display: none; }
+  .tx :global(.hotspot__t) { max-width: 0; overflow: hidden; white-space: nowrap; background: var(--c-bg); padding: 3px 0; border-radius: 2px; transition: max-width 0.5s var(--ease-out), padding 0.5s; }
+  .tx :global(.hotspot:hover .hotspot__t), .tx :global(.hotspot:focus-visible .hotspot__t), .tx :global(.hotspot.is-active .hotspot__t) { max-width: 200px; padding: 3px 8px; }
+  .tx :global(.hotspot.is-active .hotspot__dot) { animation: hs-pulse 1.6s infinite; }
+  @keyframes hs-pulse { 50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--c-accent) 0%, transparent); } }
+  .tx--compact .tx__stage { aspect-ratio: 16 / 9; }
+  @media (max-width: 1023px) {
+    .tx__stage, .tx__ui, .tx__info { grid-column: 1 / -1; grid-row: auto; }
+    .tx__stage { aspect-ratio: 4 / 3; }
+    .tx__hint { display: none; }
+  }
+  @media (max-width: 560px) { .tx__stage { aspect-ratio: 4 / 5; } }
+</style>
+<script>
+  import { whenNear } from '../scripts/motion/core';
+  import { decideQuality } from '../scripts/three/stage';
+  document.querySelectorAll<HTMLElement>('[data-tx]').forEach((root) => {
+    const stageEl = root.querySelector<HTMLElement>('[data-tx-stage]')!;
+    const ui = root.querySelector<HTMLElement>('[data-tx-ui]')!;
+    const note = root.querySelector<HTMLElement>('[data-tx-note]')!;
+    const items = root.querySelectorAll<HTMLButtonElement>('[data-focus]');
+    const descs = root.querySelectorAll<HTMLElement>('[data-desc]');
+    const showDesc = (key: string | null) => {
+      items.forEach((b) => b.setAttribute('aria-expanded', String(b.dataset.focus === key)));
+      descs.forEach((d) => (d.hidden = d.dataset.desc !== key));
+    };
+    const quality = stageEl.dataset.enabled === '1' ? decideQuality((stageEl.dataset.mobile as 'off' | 'low' | 'full') ?? 'low') : null;
+    if (!quality) {
+      note.hidden = false;
+      items.forEach((b) => b.addEventListener('click', () => showDesc(b.getAttribute('aria-expanded') === 'true' ? null : b.dataset.focus!)));
+      return;
+    }
+    whenNear(stageEl, async () => {
+      try {
+        const { mountConfigurator } = await import('../scripts/three/scenes/configurator');
+        const api = await mountConfigurator(stageEl, quality, JSON.parse(stageEl.dataset.hotspots || '[]'), showDesc);
+        ui.hidden = false;
+        const views = root.querySelectorAll<HTMLButtonElement>('[data-view]');
+        views.forEach((b) => b.addEventListener('click', () => {
+          views.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+          api.view(b.dataset.view as 'three');
+        }));
+        root.querySelectorAll<HTMLButtonElement>('[data-color]').forEach((b, _, all) => b.addEventListener('click', () => {
+          all.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+          api.color(b.dataset.color!);
+        }));
+        root.querySelectorAll<HTMLButtonElement>('[data-zoom]').forEach((b) => b.addEventListener('click', () => api.zoom(parseFloat(b.dataset.zoom!))));
+        root.querySelectorAll<HTMLButtonElement>('[data-rotate]').forEach((b) => b.addEventListener('click', () => api.rotate(parseFloat(b.dataset.rotate!) * 0.6)));
+        const lights = root.querySelector<HTMLButtonElement>('[data-lights]');
+        lights?.addEventListener('click', () => { const on = lights.getAttribute('aria-pressed') !== 'true'; lights.setAttribute('aria-pressed', String(on)); api.lights(on); });
+        items.forEach((b) => b.addEventListener('click', () => api.focus(b.dataset.focus!)));
+      } catch (e) {
+        console.warn('[truck-3d] fallback image kept', e);
+        note.hidden = false;
+      }
+    });
+  });
+</script>

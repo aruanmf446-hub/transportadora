@@ -1,0 +1,33 @@
+---
+/**
+ * Internal render studio (only built with STUDIO=1). Used by
+ * scripts/render-assets.mjs to produce the original demo imagery from the
+ * procedural 3D scenes. Never part of a production build.
+ */
+import '../styles/global.css';
+import { site } from '../lib/site';
+import { themeVars } from '../lib/theme';
+export function getStaticPaths() {
+  return process.env.STUDIO === '1' ? [{ params: { studio: 'studio' } }] : [];
+}
+const truckCfg = JSON.stringify({ ...site.scene3d.truck, palette: undefined });
+---
+<html lang="pt-BR">
+  <head><meta charset="utf-8" /><meta name="robots" content="noindex" /><style set:html={themeVars(site.theme)}></style>
+    <style>html,body{margin:0;height:100%;overflow:hidden}#s{position:fixed;inset:0}#s[data-theme='dark']{background:var(--c-inverse-bg)}.stage-labels{display:none}</style>
+  </head>
+  <body>
+    <div id="s" data-truck={truckCfg}></div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      const el = document.getElementById('s')!;
+      const scene = q.get('scene') || 'hero';
+      (window as any).studio = (async () => {
+        if (scene === 'hero') { const m = await import('../scripts/three/scenes/hero'); const c = await m.mountHero(el, 'full', { animate: false }); return (el as any).__scene; }
+        if (scene === 'config') { const m = await import('../scripts/three/scenes/configurator'); await m.mountConfigurator(el, 'full', [], () => {}); return (el as any).__scene; }
+        if (scene === 'road') { el.dataset.theme = 'dark'; const m = await import('../scripts/three/scenes/road'); await m.mountRoad(el, 'full'); return (el as any).__scene; }
+        if (scene === 'hub') { const m = await import('../scripts/three/scenes/hub'); await m.mountHub(el, 'full', []); return (el as any).__scene; }
+      })();
+    </script>
+  </body>
+</html>

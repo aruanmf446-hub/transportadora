@@ -1,0 +1,114 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppWidget from '../components/WhatsAppWidget.astro';
+import { site, pageTitle, url } from '../lib/site';
+import { themeVars } from '../lib/theme';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  currentPath?: string;
+  sectionIndex?: { anchor: string; label: string }[];
+  noindex?: boolean;
+}
+const { title, description = site.seo.description, image = site.seo.ogImage, currentPath = '', sectionIndex = [], noindex = false } = Astro.props;
+const fullTitle = pageTitle(title);
+const canonical = new URL(Astro.url.pathname, site.seo.siteUrl).toString();
+const ogImage = image ? new URL(image, site.seo.siteUrl).toString() : undefined;
+const { theme, integrations } = site;
+const ga = integrations.analytics.ga4MeasurementId;
+const motionLevel = theme.motion.level;
+
+const hq = site.company.units.find((u) => u.hq) ?? site.company.units[0];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.brand.name,
+  legalName: site.brand.legalName,
+  description: site.brand.description,
+  url: site.seo.siteUrl,
+  foundingDate: String(site.company.foundedYear),
+  email: site.company.contact.email,
+  telephone: site.company.contact.phone,
+  sameAs: site.company.social.map((s) => s.href),
+  address: hq ? { '@type': 'PostalAddress', streetAddress: hq.address, addressLocality: hq.city, addressRegion: hq.state, addressCountry: hq.country } : undefined,
+};
+---
+<!doctype html>
+<html lang={site.seo.locale} data-motion={motionLevel} data-client={site.id} data-transitions={theme.motion.pageTransitions ? 'on' : 'off'} data-smooth={theme.motion.smoothScroll ? 'on' : 'off'} data-magnetic={theme.motion.magneticButtons ? 'on' : 'off'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content={theme.colors.bg} />
+    <link rel="icon" href={site.brand.favicon} type="image/svg+xml" />
+    <link rel="sitemap" href={url('sitemap.xml').replace(/\/$/, '')} />
+    {site.seo.keywords.length > 0 && <meta name="keywords" content={site.seo.keywords.join(', ')} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={site.seo.locale.replace('-', '_')} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    {site.seo.twitterHandle && <meta name="twitter:site" content={site.seo.twitterHandle} />}
+    {integrations.analytics.searchConsoleVerification && <meta name="google-site-verification" content={integrations.analytics.searchConsoleVerification} />}
+    <style set:html={themeVars(theme)}></style>
+    <script is:inline define:vars={{ motionLevel }}>
+      (function () {
+        var d = document.documentElement;
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        d.classList.add('js');
+        window.addEventListener('pagereveal', function (e) { if (e.viewTransition) d.classList.add('vt-nav'); });
+        if (motionLevel !== 'none' && !reduce) {
+          d.classList.add('motion-ok');
+          setTimeout(function () { d.classList.add('motion-ready'); }, 3500);
+        } else {
+          d.dataset.motion = 'none';
+        }
+      })();
+    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    {ga && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga}`}></script>
+        <script is:inline define:vars={{ ga }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', ga, { anonymize_ip: true });
+        </script>
+      </>
+    )}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <div class="curtain" aria-hidden="true"><span class="curtain__bar"></span></div>
+    <Header currentPath={currentPath} sectionIndex={sectionIndex} />
+    <main id="conteudo" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <WhatsAppWidget />
+    <script>
+      import { initMotion } from '../scripts/motion/core';
+      initMotion();
+    </script>
+  </body>
+</html>
+<style is:global>
+  .curtain { position: fixed; inset: 0; z-index: 900; pointer-events: none; display: none; }
+  .motion-ok .curtain { display: block; background: var(--c-inverse-bg); transform-origin: top; animation: curtain-out 1.1s var(--ease-in-out) 0.15s forwards; }
+  .curtain__bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--c-accent); transform-origin: left; animation: curtain-bar 0.6s var(--ease-out) forwards; transform: scaleX(0); }
+  @keyframes curtain-out { to { transform: scaleY(0); } }
+  @keyframes curtain-bar { to { transform: scaleX(1); } }
+  html.vt-nav .curtain { display: none; }
+</style>

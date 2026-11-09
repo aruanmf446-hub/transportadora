@@ -1,0 +1,88 @@
+---
+/** 3D Logistics Hub — explore areas of a distribution center. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const defaults = [
+  { key: 'overview', title: 'Visão geral', text: 'Centro de distribuição com docas niveladoras, pátio de contêineres e área de expedição integrados.' },
+  { key: 'docks', title: 'Docas', text: 'Docas com agendamento de janelas, niveladoras e controle de pátio para giro rápido de veículos.' },
+  { key: 'warehouse', title: 'Armazém', text: 'Armazenagem em porta-paletes com WMS, inventário rotativo e áreas segregadas por tipo de produto.' },
+  { key: 'yard', title: 'Pátio de contêineres', text: 'Área para contêineres cheios e vazios, conectada às operações multimodais.' },
+  { key: 'shipping', title: 'Expedição', text: 'Consolidação de cargas, conferência e carregamento por rota de entrega.' },
+];
+const areas = c.items?.length ? c.items.map((it) => ({ key: it.meta ?? '', title: it.title, text: it.text ?? '' })) : defaults;
+const fallback = c.image ?? site.data.gallery.find((g) => /hub|aerial/.test(g.src)) ?? site.data.gallery[0];
+---
+<Section section={section} class="hb">
+  <div class="container">
+    <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} />
+    <div class="hb__wrap" data-hb>
+      <div class="hb__stage" data-hb-stage data-areas={JSON.stringify(areas.filter((a) => a.key !== 'overview'))} data-mobile={site.scene3d.mobileQuality} data-enabled={site.scene3d.enabled ? '1' : '0'}>
+        <div class="hb__fallback">{fallback && <Img image={fallback} sizes="100vw" />}</div>
+        <span class="hb__scale mono" aria-hidden="true"><i></i>20 m</span>
+      </div>
+      <ol class="hb__areas" role="list">
+        {areas.map((a, i) => (
+          <li>
+            <button type="button" class:list={['hb__area', i === 0 && 'is-on']} data-area={a.key} aria-pressed={i === 0 ? 'true' : 'false'}>
+              <span class="mono muted">{pad(i + 1)}</span>
+              <span class="hb__t">{a.title}</span>
+            </button>
+            <p class="hb__d" data-area-desc={a.key} hidden={i !== 0}>{a.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</Section>
+<style>
+  .hb__wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); }
+  .hb__stage { position: relative; grid-column: 1 / span 9; aspect-ratio: 16 / 10; border-radius: var(--r-l); overflow: hidden; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+  .hb__stage :global(.stage-canvas) { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 1s; }
+  .hb__stage:global(.is-ready) :global(.stage-canvas) { opacity: 1; }
+  .hb__fallback { position: absolute; inset: 0; transition: opacity 0.8s; }
+  .hb__fallback :global(img), .hb__fallback :global(picture) { width: 100%; height: 100%; object-fit: cover; }
+  .hb__stage:global(.is-ready) .hb__fallback { opacity: 0; }
+  .hb__scale { position: absolute; right: 16px; bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .hb__scale i { width: 48px; height: 6px; border: 1px solid currentColor; border-top: 0; }
+  .hb__areas { grid-column: 10 / -1; border-top: 1px solid var(--fg); align-self: start; }
+  .hb__areas li { border-bottom: 1px solid var(--line); }
+  .hb__area { width: 100%; display: flex; gap: 14px; padding: 16px 0; text-align: left; transition: color 0.3s, padding 0.5s var(--ease-out); }
+  .hb__area:hover, .hb__area.is-on { color: var(--accent); padding-left: 8px; }
+  .hb__t { font-weight: 500; }
+  .hb__d { font-size: 0.875rem; color: var(--fg-soft); padding: 0 0 16px 2.4rem; }
+  .hb :global(.stage-labels) { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .hb :global(.area-pin) { pointer-events: auto; display: inline-flex; align-items: center; gap: 0; translate: -14px -50%; height: 28px; border-radius: 99px; background: var(--c-ink); color: var(--c-bg); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; padding: 0 10px; transition: background-color 0.3s; }
+  .hb :global(.area-pin__t) { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.5s var(--ease-out), margin 0.5s; }
+  .hb :global(.area-pin:hover .area-pin__t), .hb :global(.area-pin.is-active .area-pin__t), .hb :global(.area-pin:focus-visible .area-pin__t) { max-width: 180px; margin-left: 8px; }
+  .hb :global(.area-pin.is-active) { background: var(--c-accent); }
+  @media (max-width: 1023px) { .hb__stage, .hb__areas { grid-column: 1 / -1; } .hb__stage { aspect-ratio: 4 / 3; } }
+</style>
+<script>
+  import { whenNear } from '../scripts/motion/core';
+  import { decideQuality } from '../scripts/three/stage';
+  document.querySelectorAll<HTMLElement>('[data-hb]').forEach((root) => {
+    const stageEl = root.querySelector<HTMLElement>('[data-hb-stage]')!;
+    const btns = root.querySelectorAll<HTMLButtonElement>('[data-area]');
+    const descs = root.querySelectorAll<HTMLElement>('[data-area-desc]');
+    const mark = (key: string) => {
+      btns.forEach((b) => { const on = b.dataset.area === key; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
+      descs.forEach((d) => (d.hidden = d.dataset.areaDesc !== key));
+    };
+    let api: { goto: (k: string) => void } | null = null;
+    btns.forEach((b) => b.addEventListener('click', () => { mark(b.dataset.area!); api?.goto(b.dataset.area!); }));
+    stageEl.addEventListener('hub:area', (e) => mark((e as CustomEvent).detail));
+    const quality = stageEl.dataset.enabled === '1' ? decideQuality((stageEl.dataset.mobile as 'off' | 'low' | 'full') ?? 'low') : null;
+    if (!quality) return;
+    whenNear(stageEl, async () => {
+      try {
+        const { mountHub } = await import('../scripts/three/scenes/hub');
+        api = await mountHub(stageEl, quality, JSON.parse(stageEl.dataset.areas || '[]'));
+      } catch (e) { console.warn('[hub-3d] fallback image kept', e); }
+    });
+  });
+</script>

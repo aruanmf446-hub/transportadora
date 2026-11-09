@@ -1,0 +1,68 @@
+---
+/** Photo gallery — horizontal drag/scroll strip with captions + lightbox. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import { site, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const imgs = site.data.gallery;
+---
+<Section section={section} class="ga">
+  <div class="container"><SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} /></div>
+  <div class="ga__strip" data-ga-strip tabindex="0" aria-label="Galeria de imagens — use as setas para navegar" data-lenis-prevent-wheel>
+    {imgs.map((im, i) => (
+      <figure class:list={['ga__item', `ga__item--${i % 3}`]} data-reveal="fade" data-delay={String(Math.min(i, 3) * 0.08)}>
+        <button type="button" class="ga__btn media" data-ga-open={i} aria-label={`Ampliar: ${im.alt || im.caption || `imagem ${i + 1}`}`}>
+          <Img image={im} sizes="(min-width: 1024px) 40vw, 80vw" widths={[480, 800, 1200, 1600]} />
+        </button>
+        <figcaption class="mono"><span class="muted">{pad(i + 1)}</span> {im.caption}</figcaption>
+      </figure>
+    ))}
+  </div>
+  <dialog class="ga__lb" data-ga-dialog aria-label="Imagem ampliada">
+    <div class="ga__lb-inner" data-ga-target></div>
+    <button type="button" class="ga__close mono" data-ga-close>Fechar ✕</button>
+  </dialog>
+</Section>
+<style>
+  .ga { overflow: clip; }
+  .ga__strip { display: flex; gap: var(--col-gap); overflow-x: auto; padding-inline: var(--gutter); scroll-snap-type: x mandatory; scrollbar-width: none; cursor: grab; padding-bottom: 8px; }
+  .ga__strip::-webkit-scrollbar { display: none; }
+  .ga__strip.is-drag { cursor: grabbing; scroll-snap-type: none; }
+  .ga__item { flex: none; scroll-snap-align: start; display: grid; gap: 10px; }
+  .ga__item--0 { width: clamp(280px, 42vw, 720px); }
+  .ga__item--1 { width: clamp(220px, 26vw, 440px); margin-top: clamp(0px, 6vw, 96px); }
+  .ga__item--2 { width: clamp(260px, 34vw, 580px); }
+  .ga__btn { display: block; width: 100%; aspect-ratio: 4 / 3; cursor: zoom-in; }
+  .ga__item--1 .ga__btn { aspect-ratio: 3 / 4; }
+  .ga__btn :global(img) { transition: transform 1.2s var(--ease-out); pointer-events: none; }
+  .ga__btn:hover :global(img) { transform: scale(1.04); }
+  .ga__lb { max-width: none; max-height: none; width: 100vw; height: 100dvh; margin: 0; padding: var(--gutter); border: 0; background: color-mix(in srgb, var(--c-inverse-bg) 96%, transparent); }
+  .ga__lb[open] { display: grid; place-items: center; }
+  .ga__lb-inner { width: min(1400px, 100%); max-height: 86vh; }
+  .ga__lb-inner :global(img) { width: 100%; height: auto; max-height: 86vh; object-fit: contain; }
+  .ga__close { position: absolute; top: 20px; right: var(--gutter); color: var(--c-inverse-ink); padding: 8px 12px; }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ga-strip]').forEach((strip) => {
+    let down = false, sx = 0, sl = 0, moved = 0;
+    strip.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; down = true; moved = 0; sx = e.clientX; sl = strip.scrollLeft; });
+    window.addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - sx; moved = Math.abs(dx); if (moved > 4) strip.classList.add('is-drag'); strip.scrollLeft = sl - dx; });
+    window.addEventListener('pointerup', () => { down = false; strip.classList.remove('is-drag'); });
+    strip.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') strip.scrollBy({ left: strip.clientWidth * 0.6, behavior: 'smooth' }); if (e.key === 'ArrowLeft') strip.scrollBy({ left: -strip.clientWidth * 0.6, behavior: 'smooth' }); });
+    const sec = strip.closest('section')!;
+    const dlg = sec.querySelector<HTMLDialogElement>('[data-ga-dialog]')!;
+    const target = sec.querySelector<HTMLElement>('[data-ga-target]')!;
+    strip.querySelectorAll<HTMLButtonElement>('[data-ga-open]').forEach((b) => b.addEventListener('click', (e) => {
+      if (moved > 4) { e.preventDefault(); return; }
+      const pic = b.querySelector('picture, img');
+      target.innerHTML = '';
+      if (pic) { const clone = pic.cloneNode(true) as HTMLElement; clone.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; i.sizes = '100vw'; }); target.appendChild(clone); }
+      dlg.showModal();
+    }));
+    sec.querySelector('[data-ga-close]')!.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  });
+</script>

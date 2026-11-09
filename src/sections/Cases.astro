@@ -1,0 +1,78 @@
+---
+/** Cases — "featured" (asymmetric editorial) or "list" (all, large rows). */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Img from '../components/Img.astro';
+import Icon from '../components/Icon.astro';
+import { site, caseUrl, pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const featured = section.variant === 'featured';
+const all = site.data.cases;
+const items = featured ? (all.filter((x) => x.featured).length ? all.filter((x) => x.featured) : all).slice(0, 3) : all;
+---
+<Section section={section} class:list={['cs', featured ? 'cs--featured' : 'cs--list']}>
+  <div class="container">
+    {(c.title || c.eyebrow) && <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} cta={c.cta} anchors={anchors} />}
+    <ol class="cs__items">
+      {items.map((it, i) => {
+        const href = caseUrl(it.slug);
+        const Tag = href ? 'a' : 'div';
+        return (
+          <li class="cs__item">
+            <Tag href={href ?? undefined} class="cs__link">
+              <div class="cs__media media" data-reveal="mask">
+                <div class="cs__inner"><Img image={it.image} sizes={featured && i === 0 ? '(min-width: 1024px) 60vw, 100vw' : '(min-width: 1024px) 40vw, 100vw'} /></div>
+                <span class="cs__sector mono">{it.sector} · {it.year}</span>
+              </div>
+              <div class="cs__info" data-reveal="fade">
+                <span class="mono muted">{pad(i + 1)} — {it.client}</span>
+                <h3 class="h3 cs__title">{it.title}</h3>
+                <p class="muted cs__sum">{it.summary}</p>
+                {it.results.length > 0 && (
+                  <dl class="cs__results">
+                    {it.results.slice(0, 3).map((r) => (<div><dt class="sr-only">{r.label}</dt><dd><strong>{r.value}</strong><span class="mono muted">{r.label}</span></dd></div>))}
+                  </dl>
+                )}
+                {href && <span class="cs__more">Ver case <Icon name="arrow" /></span>}
+              </div>
+            </Tag>
+          </li>
+        );
+      })}
+    </ol>
+    {site.demo.enabled && <p class="demo-flag cs__flag">Projetos e resultados fictícios</p>}
+  </div>
+</Section>
+<style>
+  .cs__items { display: grid; gap: clamp(56px, 7vw, 120px); }
+  .cs__link { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); align-items: end; }
+  .cs__media { grid-column: 1 / span 7; aspect-ratio: 16 / 10; }
+  .cs__inner { position: absolute; inset: 0; transition: transform 1.4s var(--ease-out); }
+  a.cs__link:hover .cs__inner { transform: scale(1.045); }
+  .cs__sector { position: absolute; left: 14px; top: 14px; padding: 4px 8px; background: var(--c-bg); color: var(--c-ink); border-radius: 2px; }
+  .cs__info { grid-column: 9 / -1; display: grid; gap: 14px; }
+  .cs__item:nth-child(even) .cs__media { grid-column: 6 / -1; grid-row: 1; }
+  .cs__item:nth-child(even) .cs__info { grid-column: 1 / span 4; grid-row: 1; }
+  .cs__title { transition: color 0.3s; }
+  a.cs__link:hover .cs__title { color: var(--accent); }
+  .cs__results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 6px; }
+  .cs__results dd { margin: 0; display: grid; gap: 4px; }
+  .cs__results strong { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(1.4rem, 2vw, 2rem); letter-spacing: -0.04em; }
+  .cs__results .mono { font-size: 0.625rem; }
+  .cs__more { display: inline-flex; gap: 8px; align-items: center; font-weight: 500; }
+  .cs--featured .cs__items { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--col-gap); }
+  .cs--featured .cs__item:first-child { grid-column: 1 / -1; }
+  .cs--featured .cs__item:not(:first-child) { grid-column: span 6; }
+  .cs--featured .cs__item:not(:first-child) .cs__link { grid-template-columns: 1fr; }
+  .cs--featured .cs__item:not(:first-child) .cs__media, .cs--featured .cs__item:not(:first-child) .cs__info { grid-column: 1; grid-row: auto; }
+  .cs--featured .cs__item:nth-child(3) { margin-top: clamp(0px, 10vw, 160px); }
+  .cs__flag { margin-top: 32px; }
+  @media (max-width: 900px) {
+    .cs__link { grid-template-columns: 1fr; }
+    .cs__media, .cs__info, .cs__item:nth-child(even) .cs__media, .cs__item:nth-child(even) .cs__info { grid-column: 1; grid-row: auto; }
+    .cs--featured .cs__item:not(:first-child) { grid-column: 1 / -1; }
+    .cs--featured .cs__item:nth-child(3) { margin-top: 0; }
+  }
+</style>

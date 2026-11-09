@@ -1,0 +1,31 @@
+---
+/** Logo: client file (brand.logo.src) or generated typographic logo. */
+import { site, url } from '../lib/site';
+interface Props { inverse?: boolean; class?: string; link?: boolean }
+const { inverse = false, class: cls, link = true } = Astro.props;
+const { logo, name } = site.brand;
+const file = inverse && logo.srcInverse ? logo.srcInverse : logo.src;
+const Tag = link ? 'a' : 'span';
+---
+<Tag href={link ? url('') : undefined} class:list={['logo', cls]} aria-label={link ? `${name} — página inicial` : undefined}>
+  {file ? (
+    <img src={file} alt={name} width={logo.width} height="32" style={`width:${logo.width}px;height:auto`} />
+  ) : (
+    <>
+      {logo.mark !== 'none' && (
+        <svg class="logo__mark" viewBox="0 0 28 28" aria-hidden="true">
+          {logo.mark === 'vector' && (<><path d="M2 6h10l8 8-8 8H2l8-8z" fill="currentColor" /><rect x="20" y="11" width="6" height="6" fill="var(--c-accent)" /></>)}
+          {logo.mark === 'chevron' && (<><path d="M3 4h7l9 10-9 10H3l9-10z" fill="currentColor" /><path d="M14 4h7l4.5 10L21 24h-7l4.5-10z" fill="var(--c-accent)" /></>)}
+          {logo.mark === 'grid' && (<><rect x="2" y="2" width="10" height="10" fill="currentColor" /><rect x="16" y="2" width="10" height="10" fill="currentColor" /><rect x="2" y="16" width="10" height="10" fill="currentColor" /><rect x="16" y="16" width="10" height="10" fill="var(--c-accent)" /></>)}
+          {logo.mark === 'orbit' && (<><circle cx="14" cy="14" r="11" fill="none" stroke="currentColor" stroke-width="2.4" /><ellipse cx="14" cy="14" rx="11" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.6" /><circle cx="23.5" cy="9" r="3" fill="var(--c-accent)" /></>)}
+        </svg>
+      )}
+      <span class="logo__word">{name}</span>
+    </>
+  )}
+</Tag>
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 10px; color: inherit; line-height: 1; }
+  .logo__mark { width: 26px; height: 26px; flex: none; }
+  .logo__word { font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; letter-spacing: -0.045em; }
+</style>

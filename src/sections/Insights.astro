@@ -1,0 +1,94 @@
+---
+/** Institutional insights — single-series horizontal bar chart (share by
+ *  segment), rendered as an accessible table with bar marks. */
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { site, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const segs = site.data.segments.filter((s) => s.share !== undefined).sort((a, b) => (b.share ?? 0) - (a.share ?? 0));
+const max = Math.max(...segs.map((s) => s.share ?? 0), 1);
+const fmt = (v: number) => new Intl.NumberFormat(site.seo.locale, { maximumFractionDigits: 1 }).format(v);
+const years = new Date().getFullYear() - site.company.foundedYear;
+---
+<Section section={section} class="in">
+  <div class="container in__grid">
+    <div class="in__head">
+      <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} layout="stack" />
+      <dl class="in__facts" data-reveal="stagger">
+        <div><dt class="mono muted">Anos de operação</dt><dd>{years}</dd></div>
+        <div><dt class="mono muted">Segmentos</dt><dd>{site.data.segments.length}</dd></div>
+        <div><dt class="mono muted">Unidades</dt><dd>{site.company.units.length}</dd></div>
+      </dl>
+    </div>
+    {segs.length > 0 && (
+      <figure class="in__chart">
+        <figcaption class="mono muted in__cap">Participação por segmento (% da receita operacional){site.demo.enabled && ' — valores fictícios'}</figcaption>
+        <table class="in__table">
+          <thead class="sr-only"><tr><th scope="col">Segmento</th><th scope="col">Participação</th></tr></thead>
+          <tbody>
+            {segs.map((s) => (
+              <tr class="in__row" tabindex="0" data-tip={`${s.name}: ${fmt(s.share!)}%${s.detail ? ' — ' + s.detail : ''}`}>
+                <th scope="row" class="in__name">{s.name}</th>
+                <td class="in__val">
+                  <span class="in__track" aria-hidden="true"><span class="in__bar" style={`--w:${(s.share! / max) * 100}%`}></span></span>
+                  <span class="in__num tabular">{fmt(s.share!)}%</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div class="in__tip mono" role="status" aria-live="polite" data-in-tip></div>
+      </figure>
+    )}
+  </div>
+</Section>
+<style>
+  .in__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); }
+  .in__head { grid-column: 1 / span 5; }
+  .in__head :global(.shead) { grid-template-columns: 1fr; }
+  .in__facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid var(--line); padding-top: 20px; }
+  .in__facts dd { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 3vw, 3rem); letter-spacing: -0.05em; line-height: 1; }
+  .in__chart { grid-column: 7 / -1; position: relative; margin: 0; }
+  .in__cap { display: block; margin-bottom: 20px; }
+  .in__table { width: 100%; border-collapse: collapse; }
+  .in__row { outline: none; }
+  .in__row th, .in__row td { padding: 1px 0; }
+  .in__name { text-align: left; font-weight: 400; font-size: 0.9375rem; width: 38%; padding-right: 16px !important; white-space: nowrap; color: var(--fg-soft); }
+  .in__val { display: flex; align-items: center; gap: 12px; height: 34px; border-top: 2px solid var(--bg); }
+  .in__track { flex: 1; height: 100%; display: block; }
+  .in__bar { display: block; height: 100%; width: var(--w); background: var(--accent); border-radius: 0 4px 4px 0; transform-origin: left; transition: transform 1.4s var(--ease-out), opacity 0.3s; }
+  :global(.motion-ok) .in__bar { transform: scaleX(0); }
+  :global(.motion-ok) .in__chart.is-in .in__bar { transform: scaleX(1); }
+  .in__chart.is-in .in__row:nth-child(2) .in__bar { transition-delay: 0.06s; }
+  .in__chart.is-in .in__row:nth-child(3) .in__bar { transition-delay: 0.12s; }
+  .in__chart.is-in .in__row:nth-child(4) .in__bar { transition-delay: 0.18s; }
+  .in__chart.is-in .in__row:nth-child(n + 5) .in__bar { transition-delay: 0.24s; }
+  .in__table:hover .in__row:not(:hover) .in__bar, .in__table:focus-within .in__row:not(:focus) .in__bar { opacity: 0.45; }
+  .in__num { width: 3.5rem; text-align: right; font-size: 0.875rem; color: var(--fg); }
+  .in__tip { position: absolute; pointer-events: none; padding: 6px 10px; background: var(--c-ink); color: var(--c-bg); border-radius: 4px; opacity: 0; transition: opacity 0.2s; white-space: nowrap; transform: translate(-50%, -130%); }
+  .in__tip.is-on { opacity: 1; }
+  @media (max-width: 1023px) { .in__head, .in__chart { grid-column: 1 / -1; } .in__chart { margin-top: 48px; } .in__name { white-space: normal; } }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('.in__chart').forEach((chart) => {
+    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { chart.classList.add('is-in'); io.disconnect(); } }, { rootMargin: '-15% 0px' });
+    io.observe(chart);
+    const tip = chart.querySelector<HTMLElement>('[data-in-tip]')!;
+    const show = (row: HTMLElement, x?: number) => {
+      const r = row.getBoundingClientRect();
+      const c = chart.getBoundingClientRect();
+      tip.textContent = row.dataset.tip ?? '';
+      tip.style.left = `${(x ?? r.left + r.width * 0.6) - c.left}px`;
+      tip.style.top = `${r.top - c.top}px`;
+      tip.classList.add('is-on');
+    };
+    chart.querySelectorAll<HTMLElement>('.in__row').forEach((row) => {
+      row.addEventListener('pointermove', (e) => show(row, e.clientX));
+      row.addEventListener('pointerleave', () => tip.classList.remove('is-on'));
+      row.addEventListener('focus', () => show(row));
+      row.addEventListener('blur', () => tip.classList.remove('is-on'));
+    });
+  });
+</script>

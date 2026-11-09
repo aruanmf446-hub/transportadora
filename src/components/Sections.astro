@@ -1,0 +1,13 @@
+---
+/** Renders a list of resolved sections through the registry. */
+import { registry } from '../sections/registry';
+import type { ResolvedSection } from '../lib/site';
+interface Props { sections: ResolvedSection[]; extra?: Record<string, unknown> }
+const { sections, extra = {} } = Astro.props;
+const anchors = sections.map((s) => s.anchor);
+---
+{sections.map((section) => {
+  const Comp = registry[section.type] as any;
+  if (!Comp) { console.warn(`[sections] No component registered for "${section.type}"`); return null; }
+  return <Comp section={section} anchors={anchors} {...extra} />;
+})}

@@ -1,0 +1,44 @@
+---
+import Section from '../components/Section.astro';
+import Img from '../components/Img.astro';
+import { pad, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section } = Astro.props;
+const c = section.content;
+---
+<Section section={section} class="su">
+  <div class="container su__grid">
+    <div class="su__head">
+      {c.eyebrow && <p class="eyebrow" data-reveal="fade">{c.eyebrow}</p>}
+      <h2 class="h1" data-reveal="lines">{c.title}</h2>
+      {c.lead && <p class="lead" data-reveal="fade">{c.lead}</p>}
+    </div>
+    {c.image && (
+      <div class="su__media media" data-reveal="clip-x">
+        <div class="su__inner" data-parallax="0.2"><Img image={c.image} sizes="(min-width: 1024px) 50vw, 100vw" /></div>
+      </div>
+    )}
+    {c.items && (
+      <ol class="su__items">
+        {c.items.map((it, i) => (
+          <li data-reveal="fade" data-delay={String(i * 0.06)}>
+            <span class="su__meta mono">{pad(i + 1)} — {it.meta}</span>
+            <h3 class="h4">{it.title}</h3>
+            {it.text && <p class="muted">{it.text}</p>}
+          </li>
+        ))}
+      </ol>
+    )}
+  </div>
+</Section>
+<style>
+  .su__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--col-gap); row-gap: clamp(48px, 6vw, 96px); }
+  .su__head { grid-column: 1 / span 6; display: grid; gap: 24px; align-content: start; }
+  .su__media { grid-column: 7 / -1; aspect-ratio: 16 / 11; }
+  .su__inner { position: absolute; inset: -10% 0; }
+  .su__items { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--col-gap); }
+  .su__items li { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 1px solid var(--fg); }
+  .su__meta { color: var(--accent); }
+  @media (max-width: 1023px) { .su__head, .su__media { grid-column: 1 / -1; } .su__items { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; } }
+  @media (max-width: 560px) { .su__items { grid-template-columns: 1fr; } }
+</style>
