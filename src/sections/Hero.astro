@@ -7,6 +7,7 @@
  * 3D always ships a poster image fallback (no WebGL, save-data, reduced motion).
  */
 import Section from '../components/Section.astro';
+import HeroStatic from '../components/HeroStatic.astro';
 import Button from '../components/Button.astro';
 import Img from '../components/Img.astro';
 import { site, lines, type ResolvedSection } from '../lib/site';
@@ -24,6 +25,9 @@ const ticker = data.services.map((s) => s.title);
 const truckCfg = JSON.stringify({ ...scene3d.truck, palette: undefined });
 const titleLines = lines(c.title ?? site.brand.tagline);
 ---
+{mode === 'image' ? (
+<Section section={section} flush><HeroStatic section={section} anchors={anchors} /></Section>
+) : (
 <Section section={section} class:list={['hero', `hero--${mode}`]} theme={mode === '3d' ? 'light' : 'dark'} flush>
   <div class="hero__media" aria-hidden={use3d ? 'true' : undefined}>
     {use3d && (
@@ -51,7 +55,7 @@ const titleLines = lines(c.title ?? site.brand.tagline);
     <div class="hero__meta mono" data-hero-meta>
       <span>{hq ? `Sede · ${hq.city}${hq.state ? '/' + hq.state : ''}` : site.brand.name}</span>
       {hq?.lat !== undefined && <span class="only-desktop">{coord(hq.lat)} / {coord(hq.lon, 'L', 'O')}</span>}
-      <span>Desde {company.foundedYear}</span>
+      {company.foundedYear !== undefined && <span>Desde {company.foundedYear}</span>}
     </div>
 
     <div class="hero__content">
@@ -82,6 +86,7 @@ const titleLines = lines(c.title ?? site.brand.tagline);
   )}
   <div class="hero__scroll mono" aria-hidden="true"><span>Role</span><i></i></div>
 </Section>
+)}
 
 <style>
   .hero { min-height: 100svh; min-height: max(100svh, 640px); display: grid; grid-template-rows: 1fr auto; overflow: clip; isolation: isolate; }
@@ -133,7 +138,6 @@ const titleLines = lines(c.title ?? site.brand.tagline);
 
 <script>
   import { gsap, ScrollTrigger, motionEnabled } from '../scripts/motion/core';
-  import { decideQuality } from '../scripts/three/stage';
 
   const hero = document.querySelector<HTMLElement>('.sec-hero');
   const stageEl = hero?.querySelector<HTMLElement>('[data-hero-stage]');
@@ -150,6 +154,7 @@ const titleLines = lines(c.title ?? site.brand.tagline);
   }
 
   if (stageEl) {
+    const { decideQuality } = await import('../scripts/three/stage');
     const quality = decideQuality((stageEl.dataset.mobile as 'off' | 'low' | 'full') ?? 'low');
     if (quality) {
       import('../scripts/three/scenes/hero').then(async ({ mountHero }) => {

@@ -5,6 +5,7 @@
  */
 import { defineClient, extendClient } from '../../define';
 import base from '../ortiva';
+import { warehousing } from '../service-profiles';
 import type { SiteConfigInput } from '../../schema';
 
 type Page = SiteConfigInput['pages'][number];
@@ -12,11 +13,10 @@ const pages: Page[] = base.pages
   .filter((p) => p.id !== 'cases') // cases page removed entirely → menu, links & sitemap update
   .map((p) => {
     if (p.id !== 'home') return p;
-    const pick = ['hero', 'metrics', 'hub-3d', 'solutions', 'routes-map', 'clients', 'quote', 'cta'];
+    const pick = ['hero', 'solutions', 'technology', 'about', 'quote', 'cta', 'metrics', 'clients', 'cases'];
     const sections = (p.sections ?? [])
       .filter((s) => pick.includes(s.type))
 ;
-    sections.splice(2, 0, { type: 'hub-3d', navLabel: 'Centro logístico', theme: 'surface', content: { eyebrow: 'Armazenagem', title: 'Seu estoque em perspectiva.', lead: 'Explore as áreas do centro de distribuição (cena ilustrativa).' } });
     sections[0] = { ...sections[0], content: { ...sections[0].content, title: 'Estoque em|fluxo contínuo.', eyebrow: 'Armazenagem · Gestão de pedidos B2B · Distribuição', lead: 'Centros de distribuição com WMS, cross-docking e distribuição integrada para indústrias e varejo.' } };
     return { ...p, sections: sections.map((s) => (s.type === 'cases' ? { ...s, enabled: false } : s)) };
   });
@@ -42,13 +42,14 @@ export default defineClient(
       type: { displayWeight: 600, displayTracking: '-0.04em', uppercaseEyebrows: true },
       radius: 'none',
       buttons: 'soft',
-      nav: { style: 'bar', showSectionIndex: true },
-      motion: { level: 'subtle', smoothScroll: true, pageTransitions: true, magneticButtons: false },
+      nav: { style: 'bar', showSectionIndex: false },
+      motion: { level: 'none', smoothScroll: false, pageTransitions: false, magneticButtons: false },
     },
     hero: { mode: 'image', image: { src: 'media/hub-aerial.jpg', alt: 'Vista aérea do centro de distribuição', focus: '60% 50%' } },
     seo: { siteUrl: 'https://nordhaven.example', titleTemplate: '%s — Nordhaven', defaultTitle: 'Nordhaven — Operador logístico', description: 'Armazenagem, gestão de pedidos B2B e distribuição. Site demonstrativo de empresa fictícia.' },
     scene3d: { truck: { cabColor: '#10201C', bodyColor: '#F3F4F1', livery: { text: 'NORDHAVEN', subtext: 'LOGÍSTICA CONTÍNUA', stripe: true }, palette: [{ name: 'Verde', value: '#0F7B63' }, { name: 'Grafite', value: '#10201C' }, { name: 'Branco', value: '#F3F4F1' }] } },
     integrations: { tracking: { enabled: false, url: 'https://rastreamento.example.com/', label: 'Rastrear', inputLabel: 'Código' } },
+    data: { services: warehousing },
     pages,
     footer: { statement: 'Estoque em fluxo contínuo.' },
   }),

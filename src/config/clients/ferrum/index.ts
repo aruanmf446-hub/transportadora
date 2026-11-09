@@ -4,6 +4,7 @@
  */
 import { defineClient, extendClient } from '../../define';
 import base from '../ortiva';
+import { specialCargo } from '../service-profiles';
 import type { SiteConfigInput } from '../../schema';
 
 type Page = SiteConfigInput['pages'][number];
@@ -33,11 +34,12 @@ export default defineClient(
       type: { displayWeight: 600, displayTracking: '-0.045em', uppercaseEyebrows: true },
       radius: 'none',
       buttons: 'square',
-      motion: { level: 'standard', smoothScroll: true, pageTransitions: true, magneticButtons: true },
+      motion: { level: 'none', smoothScroll: false, pageTransitions: false, magneticButtons: false },
     },
-    hero: { mode: 'video' },
+    hero: { mode: 'image', image: { src: 'media/truck-top.jpg', alt: 'Vista superior de um conjunto rodoviário', focus: '50% 50%' } },
     seo: { siteUrl: 'https://ferrum.example', titleTemplate: '%s — Ferrum', defaultTitle: 'Ferrum — Transporte industrial', description: 'Cargas especiais, indivisíveis e projetos industriais. Site demonstrativo de empresa fictícia.' },
     scene3d: { truck: { cabColor: '#F2B705', bodyColor: '#E9E7E0', livery: { text: 'FERRUM', subtext: 'CARGAS PESADAS E ESPECIAIS', stripe: true }, palette: [{ name: 'Amarelo', value: '#F2B705' }, { name: 'Preto', value: '#141414' }] } },
+    data: { services: specialCargo },
     pages,
     footer: { statement: 'Engenharia para mover grandes cargas.' },
   }),

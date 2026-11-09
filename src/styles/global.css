@@ -623,3 +623,9 @@ html[data-transitions='off'] {
     display: none;
   }
 }
+
+/* The lightweight profile uses native scrolling and immediate page changes. */
+html[data-motion='none'] .hero__ticker-track,
+html[data-motion='none'] .pl__sweep { animation: none; }
+html[data-transitions='off']::view-transition-old(root),
+html[data-transitions='off']::view-transition-new(root) { animation: none; }

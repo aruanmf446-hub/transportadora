@@ -8,6 +8,7 @@ interface Props { section: ResolvedSection; anchors: string[] }
 const { section, anchors } = Astro.props;
 const c = section.content;
 const fleet = site.data.fleet;
+const showQuantities = c.options?.showQuantities === true;
 const fallback = site.data.gallery[0];
 const total = fleet.reduce((a, f) => a + (f.quantity ?? 0), 0);
 ---
@@ -25,7 +26,7 @@ const total = fleet.reduce((a, f) => a + (f.quantity ?? 0), 0);
             ))}
             <span class="fl__tag mono" data-fleet-cat>{fleet[0]?.category}</span>
           </div>
-          {total > 0 && (
+          {showQuantities && total > 0 && (
             <p class="fl__total"><span class="fl__total-n tabular">{total}</span><span class="mono muted">unidades na frota{site.demo.enabled && ' · valores fictícios'}</span></p>
           )}
         </div>
@@ -35,7 +36,7 @@ const total = fleet.reduce((a, f) => a + (f.quantity ?? 0), 0);
           <button type="button" class:list={['fl__row', i === 0 && 'is-on']} role="listitem" aria-pressed={i === 0 ? 'true' : 'false'} data-fleet-row={i} data-cat={f.category} data-reveal="fade" data-delay={String(i * 0.04)}>
             <span class="fl__num mono">{pad(i + 1)}</span>
             <span class="fl__name h4">{f.name}</span>
-            {f.quantity !== undefined && <span class="fl__qty tabular">{f.quantity}<small class="mono">un</small></span>}
+            {showQuantities && f.quantity !== undefined && <span class="fl__qty tabular">{f.quantity}<small class="mono">un</small></span>}
             <span class="fl__specs">
               <span><em class="mono">Capacidade</em>{f.capacity}</span>
               {f.dimensions && <span><em class="mono">Dimensões</em>{f.dimensions}</span>}

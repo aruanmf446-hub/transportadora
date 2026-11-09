@@ -130,7 +130,7 @@ const UnitSchema = z.object({
 export type Unit = z.infer<typeof UnitSchema>;
 
 const CompanySchema = z.object({
-  foundedYear: z.number(),
+  foundedYear: z.number().optional(),
   registration: z.string().optional(),
   contact: z.object({
     phone: z.string(),

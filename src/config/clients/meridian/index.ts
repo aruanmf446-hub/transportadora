@@ -4,6 +4,7 @@
  */
 import { defineClient, extendClient } from '../../define';
 import base from '../ortiva';
+import { international } from '../service-profiles';
 import type { SiteConfigInput } from '../../schema';
 
 type Page = SiteConfigInput['pages'][number];
@@ -11,7 +12,6 @@ const pages: Page[] = base.pages.map((p) => {
   if (p.id !== 'home') return p;
   const s = (p.sections ?? []).filter((sec) => sec.type !== 'scroll-vehicle' && sec.type !== 'truck-3d');
   s[0] = { ...s[0], content: { ...s[0].content, eyebrow: 'Agenciamento de cargas · Multimodal · Desembaraço', title: 'Conectamos|portos e pessoas.', lead: 'Operações porta a porta entre o Brasil e os principais centros logísticos do mundo, com parceiros marítimos e aéreos.' } };
-  s.splice(3, 0, { type: 'globe', navLabel: 'Conexões', theme: 'dark', content: { eyebrow: 'Rede internacional', title: 'Rotas que cruzam oceanos.', lead: 'Conexões coordenadas com armadores e agentes parceiros (dados ilustrativos).' } });
   return { ...p, sections: s };
 });
 
@@ -32,6 +32,7 @@ export default defineClient(
     },
     seo: { siteUrl: 'https://meridian.example', titleTemplate: '%s — Meridian', defaultTitle: 'Meridian — Logística internacional', description: 'Logística internacional porta a porta. Site demonstrativo de empresa fictícia.' },
     scene3d: { truck: { cabColor: '#0E1525', bodyColor: '#F4F5F7', livery: { text: 'MERIDIAN', subtext: 'LOGÍSTICA GLOBAL', stripe: true }, palette: [{ name: 'Azul', value: '#2F5BFF' }, { name: 'Marinho', value: '#0E1525' }] } },
+    data: { services: international },
     pages,
     footer: { statement: 'Conectamos portos e pessoas.' },
   }),

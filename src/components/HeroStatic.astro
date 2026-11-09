@@ -1,0 +1,33 @@
+---
+import Button from './Button.astro';
+import Img from './Img.astro';
+import { site, lines, type ResolvedSection } from '../lib/site';
+interface Props { section: ResolvedSection; anchors: string[] }
+const { section, anchors } = Astro.props;
+const c = section.content;
+const image = site.hero.image ?? site.hero.fallbackImage;
+---
+<div class="simple-hero container">
+  <div class="simple-hero__copy">
+    {c.eyebrow && <p class="eyebrow">{c.eyebrow}</p>}
+    <h1>{lines(c.title ?? site.brand.tagline).map((line) => <span class="line-break">{line}</span>)}</h1>
+    {c.lead && <p class="lead">{c.lead}</p>}
+    <div class="simple-hero__actions">
+      {c.cta && <Button href={c.cta.href} label={c.cta.label} variant="accent" anchors={anchors} />}
+      {c.secondaryCta && <Button href={c.secondaryCta.href} label={c.secondaryCta.label} variant="ghost" anchors={anchors} />}
+    </div>
+    <p class="simple-hero__note mono">Atendimento direto · Condições combinadas antes da coleta</p>
+  </div>
+  {image && <div class="simple-hero__image hero__image" data-hero-static><Img image={image} loading="eager" fetchpriority="high" sizes="(min-width: 901px) 45vw, 100vw" widths={[480, 800, 1200]} /></div>}
+</div>
+<style>
+.simple-hero { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: clamp(28px, 5vw, 80px); padding-top: calc(var(--header-h) + 64px); padding-bottom: clamp(56px, 7vw, 100px); }
+.simple-hero__copy { display: grid; gap: 24px; }
+.simple-hero h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(2.8rem, 5.3vw, 5.5rem); line-height: 1.04; letter-spacing: -0.045em; }
+.simple-hero .lead { max-width: 42ch; }
+.simple-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.simple-hero__note { color: var(--muted); font-size: .65rem; max-width: 48ch; }
+.simple-hero__image { position: relative; min-width: 0; aspect-ratio: 4 / 3; background: var(--c-surface); overflow: hidden; border-radius: var(--r-l); }
+.simple-hero__image :global(img), .simple-hero__image :global(picture) { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media(max-width: 900px) { .simple-hero { grid-template-columns: 1fr; padding-top: calc(var(--header-h) + 40px); gap: 32px; } .simple-hero__image { aspect-ratio: 16 / 9; } }
+</style>

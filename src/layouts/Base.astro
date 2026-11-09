@@ -30,7 +30,7 @@ const jsonLd = {
   legalName: site.brand.legalName,
   description: site.brand.description,
   url: site.seo.siteUrl,
-  foundingDate: String(site.company.foundedYear),
+  foundingDate: site.company.foundedYear === undefined ? undefined : String(site.company.foundedYear),
   email: site.company.contact.email,
   telephone: site.company.contact.phone,
   sameAs: site.company.social.map((s) => s.href),

@@ -10,14 +10,14 @@ const c = section.content;
 const segs = site.data.segments.filter((s) => s.share !== undefined).sort((a, b) => (b.share ?? 0) - (a.share ?? 0));
 const max = Math.max(...segs.map((s) => s.share ?? 0), 1);
 const fmt = (v: number) => new Intl.NumberFormat(site.seo.locale, { maximumFractionDigits: 1 }).format(v);
-const years = new Date().getFullYear() - site.company.foundedYear;
+const years = site.company.foundedYear === undefined ? undefined : new Date().getFullYear() - site.company.foundedYear;
 ---
 <Section section={section} class="in">
   <div class="container in__grid">
     <div class="in__head">
       <SectionHead eyebrow={c.eyebrow} title={c.title} lead={c.lead} anchors={anchors} layout="stack" />
       <dl class="in__facts" data-reveal="stagger">
-        <div><dt class="mono muted">Anos de operação</dt><dd>{years}</dd></div>
+        {years !== undefined && <div><dt class="mono muted">Anos de operação</dt><dd>{years}</dd></div>}
         <div><dt class="mono muted">Segmentos</dt><dd>{site.data.segments.length}</dd></div>
         <div><dt class="mono muted">Unidades</dt><dd>{site.company.units.length}</dd></div>
       </dl>

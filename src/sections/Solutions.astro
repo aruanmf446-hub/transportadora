@@ -62,10 +62,10 @@ const services = site.data.services;
   }
 </style>
 <script>
-  import { gsap, isFinePointer } from '../scripts/motion/core';
+  import { gsap, isFinePointer, motionEnabled } from '../scripts/motion/core';
   document.querySelectorAll<HTMLElement>('.sec-solutions').forEach((sec) => {
     const preview = sec.querySelector<HTMLElement>('[data-sl-preview]');
-    if (!preview || !isFinePointer()) return;
+    if (!preview || !isFinePointer() || !motionEnabled()) return;
     const xTo = gsap.quickTo(preview, 'x', { duration: 0.7, ease: 'power3.out' });
     const yTo = gsap.quickTo(preview, 'y', { duration: 0.7, ease: 'power3.out' });
     const imgs = preview.querySelectorAll<HTMLElement>('[data-pimg]');

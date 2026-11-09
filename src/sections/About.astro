@@ -7,7 +7,9 @@ interface Props { section: ResolvedSection; anchors: string[] }
 const { section, anchors } = Astro.props;
 const c = section.content;
 const paragraphs = (c.body ?? site.brand.description).split('\n\n');
-const years = new Date().getFullYear() - site.company.foundedYear;
+const foundedYear = site.company.foundedYear;
+const showHistory = c.options?.showHistory === true && foundedYear !== undefined;
+const years = foundedYear === undefined ? undefined : new Date().getFullYear() - foundedYear;
 ---
 <Section section={section} class="ab">
   <div class="container ab__grid">
@@ -17,7 +19,7 @@ const years = new Date().getFullYear() - site.company.foundedYear;
     </div>
     <div class="ab__media media" data-reveal="mask">
       {c.image && <div class="ab__inner" data-parallax="0.16"><Img image={c.image} sizes="(min-width: 1024px) 40vw, 100vw" /></div>}
-      <div class="ab__stamp" aria-hidden="true"><span class="mono">Desde</span><strong>{site.company.foundedYear}</strong><span class="mono">{years} anos</span></div>
+      {showHistory && <div class="ab__stamp" aria-hidden="true"><span class="mono">Desde</span><strong>{foundedYear}</strong><span class="mono">{years} anos</span></div>}
     </div>
     <div class="ab__body body" data-reveal="fade">
       {paragraphs.map((p) => <p>{p}</p>)}
