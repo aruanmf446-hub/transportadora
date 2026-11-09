@@ -1,6 +1,7 @@
 # Logistics Experience — template white-label para transportadoras
 
-Site estático premium para transportadoras, operadores logísticos e empresas B2B de transporte.
+Site estático para transportadoras, operadores logísticos e empresas B2B de transporte de diferentes portes.
+A apresentação padrão é leve e funciona sem estatísticas, tamanho de frota ou listas de clientes.
 **Uma base técnica, várias identidades comerciais**: tudo o que muda de um cliente para outro
 (marca, cores, fontes, textos, números, imagens, modelos 3D, seções, páginas e integrações)
 fica em arquivos de configuração locais — sem banco de dados, sem backend, sem CMS.
@@ -43,10 +44,10 @@ Presets incluídos (mesmo código, só configuração):
 
 | Preset | Perfil | Destaques |
 |---|---|---|
-| `ortiva` (padrão) | Transportadora rodoviária + multimodal | Hero 3D, sequência na estrada, configurador 3D |
-| `nordhaven` | Operador logístico | Hero fotográfico, hub 3D na home, sem página de cases |
-| `ferrum` | Transporte industrial / cargas especiais | Hero em vídeo, botões retos, sem página de carreiras |
-| `meridian` | Logística internacional | Globo 3D na home, tipografia IBM Plex |
+| `ortiva` (padrão) | Transportadora rodoviária + multimodal | Apresentação leve, atendimento direto, dados opcionais |
+| `nordhaven` | Operador logístico | Imagem estática, armazenagem e distribuição |
+| `ferrum` | Transporte industrial / cargas especiais | Imagem estática, transporte industrial |
+| `meridian` | Logística internacional | Imagem estática, tipografia IBM Plex |
 
 ## Testes e validações
 

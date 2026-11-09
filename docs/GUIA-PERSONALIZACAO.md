@@ -288,3 +288,29 @@ Definido em `src/scripts/motion/core.ts`:
 - `prefers-reduced-motion` desliga reveals, parallax, autorrotação, ticker e scroll suave; o conteúdo continua visível.
 - Transições entre páginas usam View Transitions nativas (progressivo) e uma cortina de entrada.
 - Cenas 3D só carregam perto da viewport, pausam fora dela e são descartadas ao sair da página.
+
+## Apresentação para diferentes portes
+
+Os quatro presets abrem com uma apresentação leve: imagem estática, serviços, atendimento e
+cotação. Não é necessário informar tamanho de frota, anos de operação, estatísticas, clientes,
+certificações ou cases. As listas opcionais ficam vazias até receberem dados reais do cliente.
+Não substitua esses campos por números estimados apenas para preencher a página.
+
+- **Serviços:** cadastre apenas os serviços oferecidos em `data.services`.
+- **Estatísticas:** preencha `data.stats` e ative a seção `metrics` com `enabled: true` apenas
+  quando o cliente quiser divulgar os dados.
+- **Frota:** a seção `fleet` funciona sem `quantity`. Para divulgar quantidades, informe os
+  valores reais e use `content.options.showQuantities: true` nessa seção.
+- **História:** `company.foundedYear` é opcional. O selo de anos na seção `about` só aparece
+  com `content.options.showHistory: true` e um ano de fundação informado.
+- **Clientes e projetos:** preencha as listas correspondentes e ative `clients` ou `cases`
+  quando houver conteúdo aprovado para publicação.
+- **Rastreamento, portal e vagas:** configure essas integrações somente se a empresa as utilizar.
+
+A configuração anterior, voltada a uma operadora de grande porte, foi preservada em
+`src/config/clients/ortiva/showcase.ts` e `showcase-pages.ts` como referência opcional.
+Ela contém números fictícios e não deve ser usada como descrição de um cliente real.
+
+O padrão usa `hero.mode: 'image'`, `scene3d.enabled: false` e `theme.motion.level: 'none'`.
+Rolagem artificial, transições de página e botões magnéticos também ficam desligados.
+Ative recursos adicionais apenas quando forem úteis à apresentação da empresa.
