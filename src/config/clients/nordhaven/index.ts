@@ -16,8 +16,8 @@ const pages: Page[] = base.pages
     const sections = (p.sections ?? [])
       .filter((s) => pick.includes(s.type))
 ;
-    sections.splice(2, 0, { type: 'hub-3d', navLabel: 'Centro logístico', theme: 'surface', content: { eyebrow: 'Armazenagem', title: 'Seu estoque, em um só lugar.', lead: 'Explore as áreas do CD (cena ilustrativa).' } });
-    sections[0] = { ...sections[0], content: { ...sections[0].content, title: 'Estoque em|fluxo contínuo.', eyebrow: 'Armazenagem · Fulfillment B2B · Distribuição', lead: 'Centros de distribuição com WMS, cross-docking e distribuição integrada para indústrias e varejo.' } };
+    sections.splice(2, 0, { type: 'hub-3d', navLabel: 'Centro logístico', theme: 'surface', content: { eyebrow: 'Armazenagem', title: 'Seu estoque em perspectiva.', lead: 'Explore as áreas do centro de distribuição (cena ilustrativa).' } });
+    sections[0] = { ...sections[0], content: { ...sections[0].content, title: 'Estoque em|fluxo contínuo.', eyebrow: 'Armazenagem · Gestão de pedidos B2B · Distribuição', lead: 'Centros de distribuição com WMS, cross-docking e distribuição integrada para indústrias e varejo.' } };
     return { ...p, sections: sections.map((s) => (s.type === 'cases' ? { ...s, enabled: false } : s)) };
   });
 
@@ -46,7 +46,7 @@ export default defineClient(
       motion: { level: 'subtle', smoothScroll: true, pageTransitions: true, magneticButtons: false },
     },
     hero: { mode: 'image', image: { src: 'media/hub-aerial.jpg', alt: 'Vista aérea do centro de distribuição', focus: '60% 50%' } },
-    seo: { siteUrl: 'https://nordhaven.example', titleTemplate: '%s — Nordhaven', defaultTitle: 'Nordhaven — Operador logístico', description: 'Armazenagem, fulfillment B2B e distribuição. Site demonstrativo de empresa fictícia.' },
+    seo: { siteUrl: 'https://nordhaven.example', titleTemplate: '%s — Nordhaven', defaultTitle: 'Nordhaven — Operador logístico', description: 'Armazenagem, gestão de pedidos B2B e distribuição. Site demonstrativo de empresa fictícia.' },
     scene3d: { truck: { cabColor: '#10201C', bodyColor: '#F3F4F1', livery: { text: 'NORDHAVEN', subtext: 'LOGÍSTICA CONTÍNUA', stripe: true }, palette: [{ name: 'Verde', value: '#0F7B63' }, { name: 'Grafite', value: '#10201C' }, { name: 'Branco', value: '#F3F4F1' }] } },
     integrations: { tracking: { enabled: false, url: 'https://rastreamento.example.com/', label: 'Rastrear', inputLabel: 'Código' } },
     pages,
