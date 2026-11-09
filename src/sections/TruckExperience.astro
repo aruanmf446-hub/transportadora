@@ -10,10 +10,10 @@ const { section, anchors } = Astro.props;
 const c = section.content;
 const { scene3d, data } = site;
 const defaults = [
-  { key: 'cab', title: 'Cabine leito', text: 'Cabine avançada com teto alto, climatização e isolamento acústico para jornadas longas com descanso adequado.' },
+  { key: 'cab', title: 'Cabine leito', text: 'Cabine avançada com teto alto, climatização e isolamento acústico, com espaço para descanso entre jornadas.' },
   { key: 'lights', title: 'Iluminação LED', text: 'Faróis e luzes diurnas em LED para maior visibilidade e menor consumo de energia.' },
-  { key: 'mirrors', title: 'Retrovisores', text: 'Conjunto de espelhos amplos para reduzir pontos cegos em manobras e trânsito urbano.' },
-  { key: 'wheels', title: 'Rodado & freios', text: 'Eixos com pneus de baixa resistência ao rolamento e manutenção preditiva por telemetria.' },
+  { key: 'mirrors', title: 'Retrovisores', text: 'Espelhos amplos que ajudam a reduzir pontos cegos nas manobras e no trânsito urbano.' },
+  { key: 'wheels', title: 'Rodado e freios', text: 'Eixos com pneus de baixa resistência ao rolamento e manutenção preditiva por telemetria.' },
   { key: 'skirts', title: 'Aerodinâmica', text: 'Saias laterais no implemento que reduzem o arrasto e o consumo em rodovias.' },
   { key: 'rear', title: 'Implemento baú', text: 'Portas traseiras com lacre, iluminação e para-choque de proteção.' },
 ];
@@ -71,7 +71,7 @@ const compact = section.variant === 'compact';
           </li>
         ))}
       </ol>
-      <p class="tx__note mono muted">Modelo 3D ilustrativo. {scene3d.truck.model ? '' : 'Veículo procedural genérico — substituível por modelo GLB da frota.'}</p>
+      <p class="tx__note mono muted">Modelo 3D ilustrativo. {scene3d.truck.model ? '' : 'Veículo genérico para demonstração.'}</p>
     </div>
   </div>
 </Section>

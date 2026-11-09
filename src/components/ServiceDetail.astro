@@ -28,7 +28,7 @@ const related = site.data.cases.filter((c) => c.services.includes(s.slug));
   <div class="container sd__body">
     {s.features.length > 0 && (
       <div class="sd__block">
-        <h2 class="eyebrow">O que inclui</h2>
+        <h2 class="eyebrow">O que o serviço inclui</h2>
         <ul class="sd__features" data-reveal="stagger">{s.features.map((f, i) => <li><span class="mono muted">{pad(i + 1)}</span>{f}</li>)}</ul>
       </div>
     )}

@@ -51,7 +51,7 @@ const titleLines = lines(c.title ?? site.brand.tagline);
     <div class="hero__meta mono" data-hero-meta>
       <span>{hq ? `Sede · ${hq.city}${hq.state ? '/' + hq.state : ''}` : site.brand.name}</span>
       {hq?.lat !== undefined && <span class="only-desktop">{coord(hq.lat)} / {coord(hq.lon, 'L', 'O')}</span>}
-      <span>Est. {company.foundedYear}</span>
+      <span>Desde {company.foundedYear}</span>
     </div>
 
     <div class="hero__content">

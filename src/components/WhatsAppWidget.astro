@@ -18,9 +18,9 @@ const show = wa?.enabled && wa.floatingButton;
     <div class="wa__panel" id="wa-panel" role="dialog" aria-modal="false" aria-labelledby="wa-title" data-theme="dark" hidden data-wa-panel>
       <div class="wa__head">
         <p id="wa-title" class="h4">Mensagem rápida</p>
-        <button type="button" class="wa__close" aria-label="Fechar" data-wa-close><Icon name="close" /></button>
+        <button type="button" class="wa__close" aria-label="Fechar formulário do WhatsApp" data-wa-close><Icon name="close" /></button>
       </div>
-      <p class="wa__hint muted">Preencha o que quiser — montamos a mensagem e abrimos o WhatsApp. Nada é armazenado.</p>
+      <p class="wa__hint muted">Informe seu nome e os detalhes que desejar para preparar a mensagem no WhatsApp. Este site não armazena os dados.</p>
       <form class="wa__form" data-wa-form novalidate>
         <label class="field"><span class="field__label">Nome *</span><input class="field__input" name="name" autocomplete="name" required /></label>
         <label class="field"><span class="field__label">Empresa</span><input class="field__input" name="company" autocomplete="organization" /></label>

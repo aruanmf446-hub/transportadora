@@ -49,7 +49,7 @@ const routes = geo.routes
   .filter((r): r is NonNullable<typeof r> => !!r);
 
 const KIND_LABEL: Record<string, string> = { road: 'Rodoviário', multimodal: 'Multimodal', dedicated: 'Dedicado', international: 'Internacional' };
-const CITY_LABEL: Record<string, string> = { hub: 'Hub', unit: 'Unidade', served: 'Atendida', port: 'Porto' };
+const CITY_LABEL: Record<string, string> = { hub: 'Centro logístico', unit: 'Unidade', served: 'Atendida', port: 'Porto' };
 const kinds = [...new Set(routes.map((r) => r.kind))];
 const regions = geo.regions.filter((r) => cities.some((ct) => ct.region === r.id));
 const connections = Object.fromEntries(
@@ -113,7 +113,7 @@ const labelled = new Set(cities.filter((ct) => ct.kind !== 'served').map((ct) =>
           <h3 class="h3" data-rm-name></h3>
           <p class="muted" data-rm-note></p>
           <ul class="rm__conns" data-rm-conns></ul>
-          <button type="button" class="link rm__back" data-rm-clear>Ver todas</button>
+          <button type="button" class="link rm__back" data-rm-clear>Ver todas as cidades</button>
         </div>
       </aside>
     </div>

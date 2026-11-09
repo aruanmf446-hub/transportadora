@@ -9,7 +9,7 @@ const items = navItems();
     <div class="container">
       <p class="eyebrow">Erro 404</p>
       <h1 class="mega nf__t">Rota<span class="line-break">não encontrada.</span></h1>
-      <p class="lead">O endereço pode ter mudado. Escolha um destino:</p>
+      <p class="lead">O endereço pode ter mudado ou estar incorreto. Acesse uma das páginas abaixo:</p>
       <ul class="nf__list">{items.map((i) => <li><a class="link" href={i.href}>{i.label}</a></li>)}</ul>
       <Button href={url('')} label="Voltar ao início" />
     </div>
