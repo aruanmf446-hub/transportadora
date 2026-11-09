@@ -129,7 +129,7 @@ export default defineClient({
     whatsapp: {
       enabled: true,
       number: '5519900000000',
-      greeting: 'Olá, Ortiva! Gostaria de falar com a equipe comercial.',
+      greeting: 'Olá! Gostaria de falar com a equipe comercial.',
       floatingButton: true,
     },
     quote: {

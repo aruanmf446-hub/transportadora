@@ -144,7 +144,7 @@ export const pages: Pages = [
         content: {
           eyebrow: 'Quem somos',
           title: 'Transporte orientado pela engenharia.',
-          body: 'A Ortiva (fictícia) é um operador rodoviário B2B que combina frota própria, armazenagem e conexões multimodais. Trabalhamos com contratos de longo prazo, indicadores compartilhados e equipes dedicadas a cada cliente.\n\nNossa operação é construída sobre três princípios: planejamento antes da execução, visibilidade em tempo integral e melhoria contínua orientada por dados.',
+          body: 'Somos uma empresa de transporte rodoviário B2B (fictícia), com frota própria, armazenagem e conexões multimodais. Trabalhamos com contratos de longo prazo, indicadores compartilhados e equipes dedicadas a cada cliente.\n\nNossa operação é construída sobre três princípios: planejamento antes da execução, visibilidade em tempo integral e melhoria contínua orientada por dados.',
           image: { src: 'media/hub-aerial.jpg', alt: 'Vista aérea do hub de Campinas' },
           items: [
             { title: 'Planejar', text: 'Rotas, janelas e riscos definidos antes da coleta.' },
