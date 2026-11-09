@@ -31,6 +31,23 @@ if (!parsed.success) {
   throw new Error(`[config] Invalid configuration for client "${requested}":\n${issues}`);
 }
 
-export const site: SiteConfig = parsed.data;
+/**
+ * Deployment adjustments (no edits to the client preset needed):
+ *  - BASE_URL (Astro `base`, e.g. "/transportadora" on GitHub Pages) is
+ *    prefixed to every public path in the config that starts with "/".
+ *  - SITE_URL overrides seo.siteUrl (canonical, sitemap, Open Graph).
+ */
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '');
+const withBase = (v: unknown): unknown => {
+  if (typeof v === 'string') return BASE && v.startsWith('/') && !v.startsWith('//') && !v.startsWith(BASE + '/') ? BASE + v : v;
+  if (Array.isArray(v)) return v.map(withBase);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, withBase(x)]));
+  return v;
+};
+const resolved = withBase(parsed.data) as SiteConfig;
+const siteUrlOverride = (typeof process !== 'undefined' && process.env?.SITE_URL) || undefined;
+if (siteUrlOverride) resolved.seo.siteUrl = siteUrlOverride;
+
+export const site: SiteConfig = resolved;
 export const availableClients = Object.keys(registry);
 export type { SiteConfig };

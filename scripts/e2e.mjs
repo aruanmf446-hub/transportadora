@@ -15,9 +15,12 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 
 const dist = process.argv[2] || 'dist';
+const BASE = (process.env.BASE_PATH || '').replace(/\/+$/, '');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.woff2': 'font/woff2', '.xml': 'application/xml', '.mp4': 'video/mp4', '.webm': 'video/webm', '.pdf': 'application/pdf', '.txt': 'text/plain' };
 const server = createServer((req, res) => {
-  let p = join(dist, decodeURIComponent(req.url.split('?')[0]));
+  let u = decodeURIComponent(req.url.split('?')[0]);
+  if (BASE && u.startsWith(BASE)) u = u.slice(BASE.length) || '/';
+  let p = join(dist, u);
   if (existsSync(p) && statSync(p).isDirectory()) p = join(p, 'index.html');
   if (!existsSync(p)) { res.writeHead(404); return res.end(readFileSync(join(dist, '404.html'))); }
   res.writeHead(200, { 'Content-Type': TYPES[extname(p)] || 'application/octet-stream' });
@@ -60,7 +63,7 @@ ok(`${clean}/${paths.length * 2} page renders without console errors or horizont
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const page = await ctx.newPage();
   await page.addInitScript(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return null; }; });
-  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.goto(base + BASE + '/', { waitUntil: 'networkidle' });
   // menu
   await page.click('[data-menu-toggle]');
   await page.waitForTimeout(900);
@@ -104,7 +107,7 @@ ok(`${clean}/${paths.length * 2} page renders without console errors or horizont
   const errs = [];
   page.on('pageerror', (e) => errs.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
-  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.goto(base + BASE + '/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
   const canvases = await page.$$eval('canvas.stage-canvas', (c) => c.length);
   const poster = await page.$('[data-hero-poster] img, .hero__image img, .hero__video video');
@@ -116,7 +119,7 @@ ok(`${clean}/${paths.length * 2} page renders without console errors or horizont
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
-  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.goto(base + BASE + '/', { waitUntil: 'networkidle' });
   const hidden = await page.$$eval('[data-reveal]', (els) => els.filter((e) => getComputedStyle(e).visibility === 'hidden').length);
   hidden === 0 ? ok('reduced motion: all content visible') : fail(`${hidden} elements hidden with reduced motion`);
   await ctx.close();

@@ -9,6 +9,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const dist = process.argv[2] || 'dist';
+const BASE = (process.env.BASE_PATH || '').replace(/\/+$/, '');
 const walk = (d) => readdirSync(d).flatMap((f) => (statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]));
 const files = walk(dist);
 const html = files.filter((f) => f.endsWith('.html'));
@@ -24,7 +25,9 @@ for (const file of html) {
       if (url.length > 1 && !ids.has(decodeURIComponent(url.slice(1)))) { console.error(`✗ ${relative(dist, file)}: missing anchor ${url}`); errors++; }
       continue;
     }
-    const [path] = url.split(/[?#]/);
+    let [path] = url.split(/[?#]/);
+    if (BASE && path.startsWith(BASE + '/')) path = path.slice(BASE.length);
+    else if (BASE && path === BASE) path = '/';
     const target = join(dist, decodeURIComponent(path));
     const ok = existsSync(target) && (statSync(target).isFile() || existsSync(join(target, 'index.html')));
     if (!ok) { console.error(`✗ ${relative(dist, file)}: broken ${attr} ${url}`); errors++; }

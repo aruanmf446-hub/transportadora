@@ -259,8 +259,12 @@ Cada página aceita `description`; páginas de serviço/case usam o resumo do it
 2. **Cloudflare Pages**: build command `npm run build`, output `dist`, variável `CLIENT=acme`
    (Node 22.23+). O arquivo `public/_headers` já define cache dos assets.
 3. **Vercel**: framework “Astro”, mesmas variáveis; saída estática, sem funções.
-4. Aponte o domínio e atualize `seo.siteUrl`.
-5. Envie o sitemap no Google Search Console.
+4. **GitHub Pages**: o workflow `.github/workflows/deploy-pages.yml` publica a cada push na `main`
+   (Settings → Pages → Source: *GitHub Actions*). Em site de projeto (`usuario.github.io/repo/`),
+   o workflow define `BASE_PATH=/repo` e `SITE_URL`; todos os caminhos da configuração que começam
+   com `/` recebem o prefixo automaticamente.
+5. Aponte o domínio e atualize `seo.siteUrl` (ou a variável `SITE_URL`).
+6. Envie o sitemap no Google Search Console.
 
 ### Checklist antes de publicar
 
