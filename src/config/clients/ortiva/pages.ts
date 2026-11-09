@@ -34,7 +34,7 @@ export const pages: Pages = [
         content: {
           eyebrow: 'Manifesto',
           title:
-            'Precisão começa no planejamento. Cada rota, conexão e entrega faz parte do compromisso com a sua operação.',
+            'Precisão no trajeto. Compromisso na entrega.',
           options: { signature: 'Desde 1998, em movimento.' },
         },
       },
