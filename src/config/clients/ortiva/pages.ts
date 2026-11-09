@@ -23,7 +23,7 @@ export const pages: Pages = [
         content: {
           eyebrow: 'Transporte rodoviário · Multimodal · Cargas especiais',
           title: 'Movimento|é precisão.',
-          lead: 'Malha própria, engenharia de transporte e uma torre de controle que não dorme. Para indústrias que não podem parar.',
+          lead: 'Malha própria, engenharia de transporte e acompanhamento em cada etapa. Precisão para manter sua operação em movimento.',
           cta: { label: 'Solicitar cotação', href: '#cotacao' },
           secondaryCta: { label: 'Conheça as soluções', href: 'solucoes' },
         },
@@ -34,7 +34,7 @@ export const pages: Pages = [
         content: {
           eyebrow: 'Manifesto',
           title:
-            'Cada carga é um compromisso com o tempo de alguém. Por isso planejamos cada quilômetro como engenheiros, operamos como relojoeiros e entregamos como parceiros.',
+            'Precisão começa no planejamento. Cada rota, conexão e entrega faz parte do compromisso com a sua operação.',
           options: { signature: 'Desde 1998, em movimento.' },
         },
       },
@@ -44,7 +44,7 @@ export const pages: Pages = [
         theme: 'dark',
         content: {
           eyebrow: 'Capacidade operacional',
-          title: 'Escala para operar. Precisão para cumprir.',
+          title: 'Capacidade que sustenta a operação.',
         },
       },
       {
@@ -52,7 +52,7 @@ export const pages: Pages = [
         navLabel: 'Soluções',
         content: {
           eyebrow: 'Soluções',
-          title: 'Uma operação para cada tipo de carga.',
+          title: 'Cada carga, uma operação.',
           cta: { label: 'Todas as soluções', href: 'solucoes' },
         },
       },
@@ -62,12 +62,12 @@ export const pages: Pages = [
         theme: 'dark',
         content: {
           eyebrow: 'Da coleta à entrega',
-          title: 'Um percurso, quatro garantias.',
+          title: 'Cuidado em cada etapa.',
           items: [
-            { meta: '01 — Coleta', title: 'Agendada na sua janela', text: 'Conferência digital, lacre e documento emitido na origem.' },
-            { meta: '02 — Trânsito', title: 'Monitorado em tempo integral', text: 'Telemetria, gestão de risco e alertas proativos pela torre de controle.' },
-            { meta: '03 — Conexão', title: 'Integrado a outros modais', text: 'Ferrovia e cabotagem quando a distância pede eficiência.' },
-            { meta: '04 — Entrega', title: 'Comprovada em minutos', text: 'Canhoto digital e indicadores por embarque.' },
+            { meta: '01 — Coleta', title: 'Coleta na janela agendada', text: 'Conferência digital, lacre e documento emitido na origem.' },
+            { meta: '02 — Trânsito', title: 'Acompanhamento durante o trajeto', text: 'Telemetria, gestão de risco e alertas proativos pela torre de controle.' },
+            { meta: '03 — Conexão', title: 'Conexões entre modais', text: 'Ferrovia e cabotagem conforme a rota e o perfil da carga.' },
+            { meta: '04 — Entrega', title: 'Registro da entrega', text: 'Canhoto digital e indicadores por embarque.' },
           ],
         },
       },
@@ -76,8 +76,8 @@ export const pages: Pages = [
         navLabel: 'Malha',
         content: {
           eyebrow: 'Malha operacional',
-          title: 'Onde a gente opera.',
-          lead: 'Selecione uma unidade ou região para ver as conexões. Prazos indicativos, sujeitos a cada operação.',
+          title: 'Nossa rede de conexões.',
+          lead: 'Selecione uma unidade ou região para ver as conexões. Os prazos são indicativos e variam conforme a operação.',
         },
       },
       {
@@ -86,25 +86,25 @@ export const pages: Pages = [
         theme: 'surface',
         content: {
           eyebrow: 'Frota',
-          title: 'Engenharia que você pode girar.',
-          lead: 'Explore o conjunto, troque a cor da cabine e veja os componentes que tornam cada viagem mais segura.',
+          title: 'Frota em cada detalhe.',
+          lead: 'Gire o modelo, escolha a cor da cabine e conheça seus componentes. Veículo ilustrativo.',
         },
       },
       {
         type: 'segments',
         navLabel: 'Segmentos',
-        content: { eyebrow: 'Segmentos atendidos', title: 'Indústrias que confiam no nosso tempo.' },
+        content: { eyebrow: 'Segmentos atendidos', title: 'Setores que movimentamos.' },
       },
       {
         type: 'cases',
         navLabel: 'Cases',
         variant: 'featured',
-        content: { eyebrow: 'Projetos', title: 'Problemas reais. Soluções medidas.', cta: { label: 'Ver todos os cases', href: 'cases' } },
+        content: { eyebrow: 'Projetos', title: 'Projetos em perspectiva.', cta: { label: 'Ver todos os cases', href: 'cases' } },
       },
       {
         type: 'clients',
         navLabel: 'Clientes',
-        content: { eyebrow: 'Clientes & parceiros' },
+        content: { eyebrow: 'Clientes e parceiros' },
       },
       {
         type: 'quote',
@@ -113,7 +113,7 @@ export const pages: Pages = [
         theme: 'surface',
         content: {
           eyebrow: 'Solicitação de cotação',
-          title: 'Conte para onde a sua carga vai.',
+          title: 'Qual é a sua rota?',
           lead: 'Envie os dados da operação pelo WhatsApp ou por e-mail. Um especialista responde com a proposta — não calculamos frete automaticamente.',
         },
       },
@@ -122,7 +122,7 @@ export const pages: Pages = [
         navLabel: 'Contato',
         theme: 'dark',
         content: {
-          title: 'Vamos colocar|sua carga em movimento.',
+          title: 'Sua próxima rota|começa no planejamento.',
           cta: { label: 'Falar com um especialista', href: 'contato' },
           secondaryCta: { label: 'Trabalhe conosco', href: 'trabalhe-conosco' },
         },
@@ -137,37 +137,37 @@ export const pages: Pages = [
     navLabel: 'Empresa',
     description: 'História, valores, certificações e compromisso ambiental.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Empresa', title: 'Vinte e sete anos|em movimento.', lead: 'Nascemos com três caminhões e uma rota. Crescemos com a mesma obsessão: cumprir o que prometemos.', image: { src: 'media/truck-34.jpg', alt: 'Conjunto rodoviário da frota' } } },
+      { type: 'page-header', content: { eyebrow: 'Empresa', title: 'Vinte e sete anos|em movimento.', lead: 'Começamos com três caminhões e uma rota. O compromisso com cada entrega orienta nossa trajetória.', image: { src: 'media/truck-34.jpg', alt: 'Conjunto rodoviário da frota' } } },
       {
         type: 'about',
         navLabel: 'Quem somos',
         content: {
           eyebrow: 'Quem somos',
-          title: 'Uma transportadora com cabeça de engenharia.',
-          body: 'A Ortiva (fictícia) é um operador rodoviário B2B que combina frota própria, armazenagem e conexões multimodais. Trabalhamos com contratos de longo prazo, indicadores compartilhados e equipes dedicadas por conta.\n\nNossa operação é construída sobre três princípios: planejamento antes da execução, visibilidade em tempo integral e melhoria contínua medida em dados.',
+          title: 'Transporte orientado pela engenharia.',
+          body: 'A Ortiva (fictícia) é um operador rodoviário B2B que combina frota própria, armazenagem e conexões multimodais. Trabalhamos com contratos de longo prazo, indicadores compartilhados e equipes dedicadas a cada cliente.\n\nNossa operação é construída sobre três princípios: planejamento antes da execução, visibilidade em tempo integral e melhoria contínua orientada por dados.',
           image: { src: 'media/hub-aerial.jpg', alt: 'Vista aérea do hub de Campinas' },
           items: [
             { title: 'Planejar', text: 'Rotas, janelas e riscos definidos antes da coleta.' },
-            { title: 'Ver', text: 'Cada embarque monitorado do início ao fim.' },
+            { title: 'Acompanhar', text: 'Cada embarque monitorado do início ao fim.' },
             { title: 'Melhorar', text: 'Indicadores revisados mensalmente com o cliente.' },
           ],
         },
       },
       { type: 'history', navLabel: 'História', theme: 'dark', content: { eyebrow: 'Nossa história', title: 'Marcos de uma trajetória.' } },
-      { type: 'certifications', navLabel: 'Certificações', content: { eyebrow: 'Certificações', title: 'Conformidade auditada.', lead: 'Certificações exibidas como exemplo. Substitua pelas certificações vigentes da empresa.' } },
+      { type: 'certifications', navLabel: 'Certificações', content: { eyebrow: 'Certificações', title: 'Certificações e registros.', lead: 'Certificações exibidas como exemplo. Substitua pelas certificações vigentes da empresa.' } },
       {
         type: 'sustainability',
         navLabel: 'Sustentabilidade',
         theme: 'surface',
         content: {
           eyebrow: 'Sustentabilidade',
-          title: 'Menos quilômetros vazios. Mais carga por litro.',
+          title: 'Eficiência em cada percurso.',
           image: { src: 'media/road.jpg', alt: 'Estrada ao amanhecer' },
           items: [
-            { meta: 'Frota', title: 'Renovação contínua', text: 'Idade média de frota abaixo de 4 anos, motores Euro 6 (exemplo).' },
+            { meta: 'Frota', title: 'Renovação contínua', text: 'Idade média da frota abaixo de 4 anos, motores Euro 6 (exemplo).' },
             { meta: 'Multimodal', title: 'Modal certo para cada distância', text: 'Ferrovia e cabotagem reduzem emissões em longas distâncias.' },
             { meta: 'Rotas', title: 'Otimização de retorno', text: 'Planejamento para reduzir viagens sem carga.' },
-            { meta: 'Pessoas', title: 'Motoristas no centro', text: 'Programa de direção econômica e jornada controlada.' },
+            { meta: 'Pessoas', title: 'Atenção aos motoristas', text: 'Programa de direção econômica e jornada controlada.' },
           ],
         },
       },
@@ -183,8 +183,8 @@ export const pages: Pages = [
     navLabel: 'Soluções',
     description: 'Transporte rodoviário, cargas especiais, multimodal e armazenagem.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Soluções', title: 'Do quilômetro zero|ao último metro.', lead: 'Soluções de transporte desenhadas por tipo de carga, distância e nível de serviço.' } },
-      { type: 'solutions', variant: 'index', navLabel: 'Índice', content: { eyebrow: 'Índice de soluções', title: 'Escolha a operação.' } },
+      { type: 'page-header', content: { eyebrow: 'Soluções', title: 'Da origem|ao destino.', lead: 'Operações planejadas conforme o tipo de carga, a distância e o nível de serviço.' } },
+      { type: 'solutions', variant: 'index', navLabel: 'Índice', content: { eyebrow: 'Índice de soluções', title: 'Encontre o serviço adequado.' } },
       { type: 'road-transport', navLabel: 'Rodoviário', content: { options: { service: 'transporte-rodoviario' } } },
       { type: 'special-cargo', navLabel: 'Cargas especiais', variant: 'reverse', theme: 'dark', content: { options: { service: 'cargas-especiais' } } },
       { type: 'multimodal', navLabel: 'Multimodal', content: { options: { service: 'multimodal' } } },
@@ -193,8 +193,8 @@ export const pages: Pages = [
         navLabel: 'Tecnologia',
         theme: 'surface',
         content: {
-          eyebrow: 'Tecnologia & inovação',
-          title: 'Visibilidade como padrão de serviço.',
+          eyebrow: 'Tecnologia e inovação',
+          title: 'Informação em cada etapa.',
           items: [
             { meta: 'TC-01', title: 'Torre de controle 24/7', text: 'Equipe dedicada acompanhando desvios, paradas e janelas.' },
             { meta: 'TC-02', title: 'Telemetria embarcada', text: 'Dados de condução, consumo e posição em 100% da frota.' },
@@ -207,43 +207,43 @@ export const pages: Pages = [
       { type: 'cta', theme: 'dark', content: { title: 'Precisa de uma|operação sob medida?', cta: { label: 'Solicitar cotação', href: 'contato' } } },
     ],
     detailSections: [
-      { type: 'quote', id: 'cotacao', theme: 'surface', content: { eyebrow: 'Cotação', title: 'Fale com um especialista nesta solução.' } },
+      { type: 'quote', id: 'cotacao', theme: 'surface', content: { eyebrow: 'Cotação', title: 'Converse sobre a sua operação.' } },
     ],
   },
 
   {
     id: 'structure',
     path: 'estrutura',
-    title: 'Estrutura e Frota',
+    title: 'Estrutura e frota',
     navLabel: 'Estrutura',
     description: 'Centros logísticos, frota e segurança operacional.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Estrutura & frota', title: 'Infraestrutura|que sustenta o prazo.', lead: 'Centros logísticos, frota própria e protocolos de segurança desenhados para operações críticas.', image: { src: 'media/hub-docks.jpg', alt: 'Docas do centro de distribuição' } } },
+      { type: 'page-header', content: { eyebrow: 'Estrutura e frota', title: 'Estrutura para|cada etapa.', lead: 'Centros logísticos, frota própria e protocolos de segurança definidos para operações críticas.', image: { src: 'media/hub-docks.jpg', alt: 'Docas do centro de distribuição' } } },
       {
         type: 'operations',
         navLabel: 'Estrutura',
         content: {
           eyebrow: 'Estrutura operacional',
           title: 'Cinco unidades, uma operação.',
-          lead: 'Hubs de cross-docking, armazenagem e bases operacionais conectados pela mesma torre de controle.',
+          lead: 'Centros de cross-docking, armazéns e bases operacionais conectados à mesma torre de controle.',
         },
       },
-      { type: 'hub-3d', navLabel: 'Centro logístico 3D', theme: 'surface', content: { eyebrow: 'Centro logístico', title: 'Por dentro do hub.', lead: 'Explore as áreas do centro de distribuição. Cena ilustrativa.' } },
+      { type: 'hub-3d', navLabel: 'Centro logístico 3D', theme: 'surface', content: { eyebrow: 'Centro logístico', title: 'Conheça o centro logístico.', lead: 'Explore as áreas do centro de distribuição. Cena ilustrativa.' } },
       { type: 'fleet', navLabel: 'Frota', content: { eyebrow: 'Nossa frota', title: 'Equipamento certo para cada carga.', lead: 'Quantidades ilustrativas.' } },
       { type: 'truck-3d', navLabel: 'Veículo 3D', theme: 'dark', variant: 'compact', content: { eyebrow: 'Configurador', title: 'O conjunto em detalhe.' } },
       {
         type: 'safety',
         navLabel: 'Segurança',
         content: {
-          eyebrow: 'Segurança & conformidade',
-          title: 'Segurança não é um setor. É o método.',
+          eyebrow: 'Segurança e conformidade',
+          title: 'Segurança em toda a operação.',
           items: [
             { meta: '01', title: 'Gerenciamento de risco', text: 'Planos por rota, iscas, escolta e protocolos de parada.' },
             { meta: '02', title: 'Jornada controlada', text: 'Controle eletrônico de jornada e pontos de parada homologados.' },
             { meta: '03', title: 'Treinamento contínuo', text: 'Direção defensiva, MOPP e reciclagem anual.' },
             { meta: '04', title: 'Conformidade documental', text: 'RNTRC, seguros RCTR-C e RC-DC, licenças ambientais.' },
             { meta: '05', title: 'Manutenção preditiva', text: 'Telemetria aplicada a desgaste e paradas programadas.' },
-            { meta: '06', title: 'Compliance', text: 'Código de conduta e canal de ética para toda a cadeia.' },
+            { meta: '06', title: 'Conduta e integridade', text: 'Código de conduta e canal de ética para toda a cadeia.' },
           ],
         },
       },
@@ -258,10 +258,10 @@ export const pages: Pages = [
     navLabel: 'Atuação',
     description: 'Regiões atendidas, malha de rotas e conexões internacionais.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Área de atuação', title: 'Presença onde|a indústria está.', lead: 'Malha rodoviária própria no Sul, Sudeste e Centro-Oeste, com conexões multimodais para o Nordeste e para o mundo.' } },
+      { type: 'page-header', content: { eyebrow: 'Área de atuação', title: 'Presença onde|a indústria está.', lead: 'Malha rodoviária própria no Sul, Sudeste e Centro-Oeste, com conexões multimodais com o Nordeste e rotas internacionais.' } },
       { type: 'regions', navLabel: 'Regiões', content: { eyebrow: 'Regiões atendidas', title: 'Cobertura por região.', lead: 'Percentual de municípios atendidos com operação regular (valores fictícios).' } },
       { type: 'routes-map', navLabel: 'Mapa de rotas', variant: 'full', theme: 'dark', content: { eyebrow: 'Mapa de rotas', title: 'A malha completa.' } },
-      { type: 'globe', navLabel: 'Conexões globais', content: { eyebrow: 'Conexões internacionais', title: 'Do porto para o mundo.', lead: 'Coordenamos o transporte rodoviário de e para os principais portos, conectando cargas a rotas marítimas internacionais operadas por parceiros.' } },
+      { type: 'globe', navLabel: 'Conexões globais', content: { eyebrow: 'Conexões internacionais', title: 'Do porto para o mundo.', lead: 'Coordenamos o transporte rodoviário entre os polos industriais e os principais portos, conectando cargas a rotas marítimas internacionais operadas por parceiros.' } },
       { type: 'tracking', navLabel: 'Rastreamento', theme: 'surface', content: { eyebrow: 'Rastreamento', title: 'Acompanhe sua carga.' } },
     ],
   },
@@ -274,14 +274,14 @@ export const pages: Pages = [
     navLabel: 'Cases',
     description: 'Projetos e operações de referência.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Cases & projetos', title: 'Resultados|que se medem.', lead: 'Operações de referência em diferentes setores (projetos fictícios para demonstração).' } },
+      { type: 'page-header', content: { eyebrow: 'Cases e projetos', title: 'Projetos e|resultados.', lead: 'Operações de referência em diferentes setores (projetos fictícios para demonstração).' } },
       { type: 'cases', variant: 'list', navLabel: 'Projetos', content: {} },
-      { type: 'insights', navLabel: 'Insights', theme: 'surface', content: { eyebrow: 'Insights institucionais', title: 'Como a nossa operação se distribui.', lead: 'Participação por segmento na receita operacional (valores fictícios).' } },
+      { type: 'insights', navLabel: 'Indicadores', theme: 'surface', content: { eyebrow: 'Perfil da operação', title: 'Participação por setor.', lead: 'Participação por segmento na receita operacional (valores fictícios).' } },
       { type: 'clients', navLabel: 'Clientes', variant: 'testimonials', content: { eyebrow: 'Quem confia' } },
-      { type: 'cta', theme: 'dark', content: { title: 'Seu desafio pode ser|o próximo case.', cta: { label: 'Fale com a gente', href: 'contato' } } },
+      { type: 'cta', theme: 'dark', content: { title: 'Vamos planejar|seu próximo projeto?', cta: { label: 'Fale com nossa equipe', href: 'contato' } } },
     ],
     detailSections: [
-      { type: 'cta', theme: 'dark', content: { title: 'Vamos desenhar|a sua operação?', cta: { label: 'Solicitar cotação', href: 'contato' } } },
+      { type: 'cta', theme: 'dark', content: { title: 'Vamos planejar|a sua operação?', cta: { label: 'Solicitar cotação', href: 'contato' } } },
     ],
   },
 
@@ -292,16 +292,16 @@ export const pages: Pages = [
     navLabel: 'Carreiras',
     description: 'Vagas e cultura.',
     sections: [
-      { type: 'page-header', content: { eyebrow: 'Trabalhe conosco', title: 'Quem move a carga|move a empresa.', lead: 'Procuramos pessoas que gostam de fazer bem feito — na estrada, no armazém e no escritório.' } },
+      { type: 'page-header', content: { eyebrow: 'Trabalhe conosco', title: 'Quem move a carga|move a empresa.', lead: 'Buscamos pessoas comprometidas com o trabalho e com a equipe — na estrada, no armazém e no escritório.' } },
       {
         type: 'careers',
         navLabel: 'Vagas',
         content: {
           eyebrow: 'Vagas em destaque',
           title: 'Oportunidades abertas.',
-          lead: 'Lista ilustrativa. As candidaturas acontecem na plataforma oficial de recrutamento.',
+          lead: 'Lista ilustrativa. Envie sua candidatura pela plataforma oficial de recrutamento.',
           items: [
-            { title: 'Plano de carreira', text: 'Trilhas de motorista a instrutor, de analista a coordenador.' },
+            { title: 'Plano de carreira', text: 'Percursos de desenvolvimento para motoristas, instrutores, analistas e coordenadores.' },
             { title: 'Segurança em primeiro lugar', text: 'Jornada controlada e pontos de parada homologados.' },
             { title: 'Treinamento contínuo', text: 'Academia interna com certificações.' },
           ],
@@ -318,7 +318,7 @@ export const pages: Pages = [
     navLabel: 'Contato',
     description: 'Unidades, telefones, cotação e rastreamento.',
     sections: [
-      { type: 'page-header', variant: 'compact', content: { eyebrow: 'Contato', title: 'Fale com|a operação.', lead: 'Comercial, unidades e atendimento ao cliente.' } },
+      { type: 'page-header', variant: 'compact', content: { eyebrow: 'Contato', title: 'Converse com|nossa equipe.', lead: 'Comercial, unidades e atendimento ao cliente.' } },
       { type: 'contact', navLabel: 'Unidades', content: { eyebrow: 'Unidades', title: 'Onde estamos.' } },
       { type: 'quote', id: 'cotacao', navLabel: 'Cotação', theme: 'surface', content: { eyebrow: 'Cotação', title: 'Solicite uma proposta.', lead: 'Sem cálculo automático: um especialista analisa sua operação e responde com uma proposta.' } },
       { type: 'tracking', navLabel: 'Rastreamento', content: { eyebrow: 'Rastreamento', title: 'Já é cliente?' } },
