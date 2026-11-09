@@ -20,7 +20,8 @@ export async function mountHero(el: HTMLElement, quality: Quality, opts: { anima
   const ink = cssColor('--c-ink');
   const accent = cssColor('--c-accent');
   const bg = cssColor('--c-bg');
-  scene.fog = new THREE.Fog(bg, 38, 95);
+  const fog = new THREE.Fog(bg, 38, 95);
+  scene.fog = fog;
 
   // lights
   const key = new THREE.DirectionalLight('#ffffff', 2.4);
@@ -121,7 +122,7 @@ export async function mountHero(el: HTMLElement, quality: Quality, opts: { anima
     const m = mobile();
     // scroll: orbit from 3/4 front toward a lower, wider side view and drive off
     const base = pose.pos.clone();
-    if (m) base.sub(pose.target).multiplyScalar(2.1).add(pose.target);
+    if (m) base.sub(pose.target).multiplyScalar(1.7).add(pose.target);
     const orbit = s * 0.85;
     const r = Math.hypot(base.x - pose.target.x, base.z - pose.target.z);
     const a0 = Math.atan2(base.z - pose.target.z, base.x - pose.target.x);
@@ -131,9 +132,12 @@ export async function mountHero(el: HTMLElement, quality: Quality, opts: { anima
 
     camera.position.copy(camPos);
     camera.lookAt(target);
+    const dist = camPos.distanceTo(target);
+    fog.near = dist * 1.05;
+    fog.far = dist * 2.8;
     // editorial framing: push the vehicle to the right (desktop) / top (mobile)
     const { w, h } = stage.size;
-    if (framing) camera.setViewOffset(w, h, m ? 0 : -w * 0.13, m ? h * 0.02 : h * 0.06, w, h);
+    if (framing) camera.setViewOffset(w, h, m ? 0 : -w * 0.13, m ? h * 0.1 : h * 0.06, w, h);
     else camera.clearViewOffset();
 
     // truck position = intro arrival + scroll drive-off

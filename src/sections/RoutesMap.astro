@@ -162,7 +162,7 @@ const labelled = new Set(cities.filter((ct) => ct.kind !== 'served').map((ct) =>
   .rm__index button:hover { color: var(--accent); padding-left: 6px; }
   [data-rm-info] { display: grid; gap: 10px; }
   .rm__conns { margin-top: 10px; border-top: 1px solid var(--line); }
-  .rm__conns li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+  .rm__conns :global(li) { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
   .rm__back { justify-self: start; margin-top: 12px; }
   @media (max-width: 1023px) { .rm__map, .rm--full .rm__map, .rm__panel, .rm--full .rm__panel { grid-column: 1 / -1; } .rm__label { font-size: 18px; } }
 </style>
@@ -248,7 +248,12 @@ const labelled = new Set(cities.filter((ct) => ct.kind !== 'served').map((ct) =>
         const g = root.querySelector('[data-rm-pulses]')!;
         routes.slice(0, 12).forEach((r, i) => {
           const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('r', '3.2');
+          c.setAttribute('r', '0');
+          const set = document.createElementNS('http://www.w3.org/2000/svg', 'set');
+          set.setAttribute('attributeName', 'r');
+          set.setAttribute('to', '3.2');
+          set.setAttribute('begin', `${2 + i * 0.35}s`);
+          c.appendChild(set);
           const am = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
           am.setAttribute('dur', `${3 + (i % 4)}s`);
           am.setAttribute('begin', `${2 + i * 0.35}s`);

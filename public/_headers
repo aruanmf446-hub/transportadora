@@ -1,0 +1,5 @@
+# Cloudflare Pages / Netlify cache headers (ignored by other hosts)
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+/video/*
+  Cache-Control: public, max-age=604800

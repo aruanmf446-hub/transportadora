@@ -10,11 +10,12 @@ import { themeVars } from '../lib/theme';
 export function getStaticPaths() {
   return process.env.STUDIO === '1' ? [{ params: { studio: 'studio' } }] : [];
 }
-const truckCfg = JSON.stringify({ ...site.scene3d.truck, palette: undefined });
+// Rendered photos are brand-neutral (no livery text) so every client preset can reuse them.
+const truckCfg = JSON.stringify({ ...site.scene3d.truck, cabColor: '#16181B', bodyColor: '#EDEDEA', palette: undefined, livery: { stripe: true } });
 ---
 <html lang="pt-BR">
   <head><meta charset="utf-8" /><meta name="robots" content="noindex" /><style set:html={themeVars(site.theme)}></style>
-    <style>html,body{margin:0;height:100%;overflow:hidden}#s{position:fixed;inset:0}#s[data-theme='dark']{background:var(--c-inverse-bg)}.stage-labels{display:none}</style>
+    <style>html,body{margin:0;height:100%;overflow:hidden}#s{position:fixed;inset:0}:root{--c-accent:#A3A9AF !important}#s[data-theme='dark']{background:var(--c-inverse-bg)}.stage-labels{display:none}</style>
   </head>
   <body>
     <div id="s" data-truck={truckCfg}></div>

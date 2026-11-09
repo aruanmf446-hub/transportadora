@@ -20,7 +20,7 @@ export async function mountGlobe(el: HTMLElement, quality: Quality, data: { poin
   scene.add(globe);
 
   // occluding core so back dots fade
-  globe.add(new THREE.Mesh(new THREE.SphereGeometry(R * 0.995, 64, 64), new THREE.MeshBasicMaterial({ color: cssColor('--bg', el) })));
+  globe.add(new THREE.Mesh(new THREE.SphereGeometry(R * 0.995, 64, 64), new THREE.MeshBasicMaterial({ color: cssColor('--bg', el), toneMapped: false })));
   // fibonacci dots
   const N = quality === 'full' ? 5200 : 2600;
   const pos = new Float32Array(N * 3);
@@ -87,7 +87,7 @@ export async function mountGlobe(el: HTMLElement, quality: Quality, data: { poin
   const origin = data.origin ? byId.get(data.origin) : data.points[0];
   const baseRotY = origin ? -THREE.MathUtils.degToRad(origin.lon + 90) : 0;
   globe.rotation.set(origin ? THREE.MathUtils.degToRad(origin.lat) * 0.6 : 0.3, baseRotY, 0);
-  camera.position.set(0, 0, 17.5);
+  camera.position.set(0, 0, 23);
 
   // drag to rotate
   let drag = false, lx = 0, vel = 0.0;

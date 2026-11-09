@@ -24,7 +24,7 @@ const ticker = data.services.map((s) => s.title);
 const truckCfg = JSON.stringify({ ...scene3d.truck, palette: undefined });
 const titleLines = lines(c.title ?? site.brand.tagline);
 ---
-<Section section={section} class:list={['hero', `hero--${mode}`]} flush>
+<Section section={section} class:list={['hero', `hero--${mode}`]} theme={mode === '3d' ? 'light' : 'dark'} flush>
   <div class="hero__media" aria-hidden={use3d ? 'true' : undefined}>
     {use3d && (
       <div class="hero__stage" data-hero-stage data-truck={truckCfg} data-mobile={scene3d.mobileQuality}>
@@ -95,9 +95,9 @@ const titleLines = lines(c.title ?? site.brand.tagline);
   .hero__video, .hero__image { position: absolute; inset: 0; overflow: hidden; }
   .hero__video video, .hero__image :global(img), .hero__image :global(picture), .media__inner { width: 100%; height: 100%; object-fit: cover; }
   .media__inner { position: absolute; inset: -6% 0; }
-  .hero--video .hero__media::after, .hero--image .hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--c-inverse-bg) 30%, transparent), transparent 35%, transparent 55%, color-mix(in srgb, var(--c-inverse-bg) 70%, transparent)); }
+  .hero--video .hero__media::after, .hero--image .hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--c-inverse-bg) 45%, transparent), transparent 30%, transparent 45%, color-mix(in srgb, var(--c-inverse-bg) 82%, transparent)), linear-gradient(90deg, color-mix(in srgb, var(--c-inverse-bg) 55%, transparent), transparent 65%); }
   .hero--video, .hero--image { --fg: var(--c-inverse-ink); --fg-soft: color-mix(in srgb, var(--c-inverse-ink) 85%, transparent); --muted: color-mix(in srgb, var(--c-inverse-ink) 70%, transparent); --line: color-mix(in srgb, var(--c-inverse-ink) 30%, transparent); background: var(--c-inverse-bg); }
-  .hero__vbtn { position: absolute; right: var(--gutter); bottom: 90px; z-index: 2; color: var(--c-inverse-ink); padding: 6px 12px; border-radius: 99px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-inverse-ink) 40%, transparent); }
+  .hero__vbtn { position: absolute; right: var(--gutter); top: calc(var(--header-h) + 64px); z-index: 2; color: var(--c-inverse-ink); padding: 6px 12px; border-radius: 99px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-inverse-ink) 40%, transparent); }
 
   .hero__ui { position: relative; display: grid; grid-template-rows: auto 1fr; padding-top: calc(var(--header-h) + 28px); padding-bottom: clamp(24px, 4vw, 48px); pointer-events: none; }
   .hero__ui :global(a), .hero__ui :global(button) { pointer-events: auto; }
