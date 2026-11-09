@@ -6,7 +6,7 @@ export const geo = {
     { id: 'caj', name: 'Cajamar', state: 'SP', region: 'sudeste', lat: -23.35, lon: -46.88, kind: 'unit' as const, note: 'Centro de distribuição' },
     { id: 'sts', name: 'Santos', state: 'SP', region: 'sudeste', lat: -23.96, lon: -46.33, kind: 'port' as const, note: 'Conexão portuária' },
     { id: 'rio', name: 'Rio de Janeiro', state: 'RJ', region: 'sudeste', lat: -22.9, lon: -43.2, kind: 'served' as const },
-    { id: 'bet', name: 'Betim', state: 'MG', region: 'sudeste', lat: -19.97, lon: -44.2, kind: 'unit' as const, note: 'Filial automotiva' },
+    { id: 'bet', name: 'Betim', state: 'MG', region: 'sudeste', lat: -19.97, lon: -44.2, kind: 'unit' as const, note: 'Filial dedicada ao setor automotivo' },
     { id: 'udi', name: 'Uberlândia', state: 'MG', region: 'sudeste', lat: -18.92, lon: -48.28, kind: 'served' as const },
     { id: 'vix', name: 'Vitória', state: 'ES', region: 'sudeste', lat: -20.32, lon: -40.34, kind: 'served' as const },
     { id: 'rib', name: 'Ribeirão Preto', state: 'SP', region: 'sudeste', lat: -21.17, lon: -47.81, kind: 'served' as const },
@@ -16,7 +16,7 @@ export const geo = {
     { id: 'jlle', name: 'Joinville', state: 'SC', region: 'sul', lat: -26.3, lon: -48.85, kind: 'served' as const },
     { id: 'poa', name: 'Porto Alegre', state: 'RS', region: 'sul', lat: -30.03, lon: -51.23, kind: 'served' as const },
     { id: 'cxs', name: 'Caxias do Sul', state: 'RS', region: 'sul', lat: -29.17, lon: -51.18, kind: 'served' as const },
-    { id: 'gyn', name: 'Goiânia', state: 'GO', region: 'centro-oeste', lat: -16.75, lon: -49.25, kind: 'unit' as const, note: 'Base agro' },
+    { id: 'gyn', name: 'Goiânia', state: 'GO', region: 'centro-oeste', lat: -16.75, lon: -49.25, kind: 'unit' as const, note: 'Base para o agronegócio' },
     { id: 'bsb', name: 'Brasília', state: 'DF', region: 'centro-oeste', lat: -15.79, lon: -47.88, kind: 'served' as const },
     { id: 'cgr', name: 'Campo Grande', state: 'MS', region: 'centro-oeste', lat: -20.47, lon: -54.62, kind: 'served' as const },
     { id: 'cgb', name: 'Cuiabá', state: 'MT', region: 'centro-oeste', lat: -15.6, lon: -56.1, kind: 'served' as const },
@@ -50,8 +50,8 @@ export const geo = {
   ],
   regions: [
     { id: 'sudeste', name: 'Sudeste', coverage: 100, detail: 'Malha própria diária', states: ['SP', 'RJ', 'MG', 'ES'] },
-    { id: 'sul', name: 'Sul', coverage: 92, detail: 'Filial Curitiba + parceiros', states: ['PR', 'SC', 'RS'] },
-    { id: 'centro-oeste', name: 'Centro-Oeste', coverage: 78, detail: 'Base Goiânia · agro', states: ['GO', 'DF', 'MS', 'MT'] },
+    { id: 'sul', name: 'Sul', coverage: 92, detail: 'Filial de Curitiba e parceiros', states: ['PR', 'SC', 'RS'] },
+    { id: 'centro-oeste', name: 'Centro-Oeste', coverage: 78, detail: 'Base de Goiânia · agronegócio', states: ['GO', 'DF', 'MS', 'MT'] },
     { id: 'nordeste', name: 'Nordeste', coverage: 45, detail: 'Via cabotagem e parceiros', states: ['BA', 'PE', 'CE'] },
   ],
   globe: {

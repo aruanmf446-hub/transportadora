@@ -62,7 +62,7 @@ export default defineClient({
     units: [
       {
         id: 'campinas',
-        name: 'Matriz & Hub Campinas',
+        name: 'Matriz e centro logístico Campinas',
         kind: 'Matriz · Cross-docking',
         city: 'Campinas',
         state: 'SP',
@@ -129,7 +129,7 @@ export default defineClient({
     whatsapp: {
       enabled: true,
       number: '5519900000000',
-      greeting: 'Olá, Ortiva! Gostaria de falar com o time comercial.',
+      greeting: 'Olá, Ortiva! Gostaria de falar com a equipe comercial.',
       floatingButton: true,
     },
     quote: {
@@ -181,7 +181,7 @@ export default defineClient({
         { name: 'Laranja Ortiva', value: '#E9561B' },
         { name: 'Aço', value: '#8C939A' },
       ],
-      livery: { text: 'ORTIVA', subtext: 'MOVEMENT IS PRECISION', stripe: true },
+      livery: { text: 'ORTIVA', subtext: 'MOVIMENTO É PRECISÃO', stripe: true },
       modelScale: 1,
       modelRotationY: 0,
     },
@@ -189,10 +189,10 @@ export default defineClient({
 
   data: {
     stats: [
-      { id: 'fleet', value: 420, suffix: '+', label: 'Veículos próprios', detail: 'Cavalos, rígidos e implementos' },
+      { id: 'fleet', value: 420, suffix: '+', label: 'Veículos próprios', detail: 'Cavalos mecânicos, caminhões rígidos e implementos' },
       { id: 'years', value: 27, label: 'Anos de operação', detail: 'Desde 1998' },
       { id: 'hubs', value: 5, label: 'Unidades operacionais', detail: 'SP, PR, MG e GO' },
-      { id: 'area', value: 86, suffix: ' mil m²', label: 'Área de armazenagem', detail: 'Alfandegado e geral' },
+      { id: 'area', value: 86, suffix: ' mil m²', label: 'Área de armazenagem', detail: 'Armazenagem alfandegada e geral' },
       { id: 'deliveries', value: 1.2, decimals: 1, suffix: ' mi', label: 'Entregas por ano', detail: 'Média dos últimos 3 anos' },
       { id: 'otd', value: 98.4, decimals: 1, suffix: '%', label: 'Entregas no prazo', detail: 'Indicador interno anual' },
     ],
@@ -200,11 +200,11 @@ export default defineClient({
     services: [
       {
         slug: 'transporte-rodoviario',
-        title: 'Transporte Rodoviário',
+        title: 'Transporte rodoviário',
         kicker: 'FTL · LTL · Dedicado',
         short: 'Lotação, fracionado e operações dedicadas com frota própria e monitoramento 24/7.',
         description:
-          'Malha rodoviária própria conectando os principais polos industriais do Sul, Sudeste e Centro-Oeste. Planejamento de rotas, janelas de entrega agendadas e equipes dedicadas por conta.',
+          'Malha rodoviária própria conectando os principais polos industriais do Sul, Sudeste e Centro-Oeste. Planejamento de rotas, janelas de entrega agendadas e equipes dedicadas a cada cliente.',
         image: { src: 'media/truck-side.jpg', alt: 'Vista lateral do conjunto rodoviário' },
         features: ['Carga lotação (FTL) e fracionada (LTL)', 'Operações dedicadas por cliente', 'Agendamento de janelas de entrega', 'Gerenciamento de risco e escolta', 'Torre de controle 24/7'],
         specs: [
@@ -222,7 +222,7 @@ export default defineClient({
       },
       {
         slug: 'cargas-especiais',
-        title: 'Cargas Especiais',
+        title: 'Cargas especiais',
         kicker: 'Indivisíveis · Excesso dimensional',
         short: 'Engenharia de transporte para cargas indivisíveis, pesadas e com excesso dimensional.',
         description:
@@ -243,11 +243,11 @@ export default defineClient({
       },
       {
         slug: 'multimodal',
-        title: 'Transporte Multimodal',
-        kicker: 'Rodo · Ferro · Cabotagem',
-        short: 'Integração entre rodovia, ferrovia e cabotagem para reduzir custo e emissões em longas distâncias.',
+        title: 'Transporte multimodal',
+        kicker: 'Rodovia · Ferrovia · Cabotagem',
+        short: 'Integração entre rodovia, ferrovia e cabotagem para reduzir custos e emissões em longas distâncias.',
         description:
-          'Desenhamos operações porta a porta combinando modais. Coleta e entrega rodoviária, conexão com terminais ferroviários e portos, gestão documental única.',
+          'Planejamos operações porta a porta que combinam modais, com coleta e entrega rodoviárias. Integramos terminais ferroviários, portos e gestão documental.',
         image: { src: 'media/hub-yard.jpg', alt: 'Pátio de contêineres do terminal' },
         features: ['Porta a porta com um único contrato', 'Conexão com portos de Santos e Paranaguá', 'Gestão de contêineres e devolução de vazios', 'Comparativo de emissões por modal'],
         specs: [
@@ -256,21 +256,21 @@ export default defineClient({
           { label: 'Contêineres', value: "20', 40', 40' HC e reefer" },
         ],
         process: [
-          { title: 'Desenho', text: 'Combinação de modais por custo, prazo e emissões.' },
-          { title: 'First mile', text: 'Coleta rodoviária e consolidação.' },
-          { title: 'Line haul', text: 'Ferrovia ou cabotagem com acompanhamento.' },
-          { title: 'Last mile', text: 'Distribuição rodoviária no destino.' },
+          { title: 'Planejamento', text: 'Combinação de modais por custo, prazo e emissões.' },
+          { title: 'Coleta na origem', text: 'Coleta rodoviária e consolidação.' },
+          { title: 'Transporte principal', text: 'Ferrovia ou cabotagem com acompanhamento.' },
+          { title: 'Distribuição no destino', text: 'Distribuição rodoviária no destino.' },
         ],
       },
       {
         slug: 'armazenagem',
-        title: 'Armazenagem & Distribuição',
+        title: 'Armazenagem e distribuição',
         kicker: 'WMS · Cross-docking',
         short: 'Centros de distribuição com WMS, cross-docking e distribuição B2B integrada ao transporte.',
         description:
-          'Armazenagem geral e de produtos controlados, picking, kitting e cross-docking com sistema de gestão de armazém e inventário rotativo.',
+          'Armazenagem geral e de produtos controlados, separação de pedidos, montagem de kits e cross-docking. A operação utiliza sistema de gestão de armazém e inventário rotativo.',
         image: { src: 'media/hub-docks.jpg', alt: 'Docas do centro de distribuição' },
-        features: ['WMS com inventário rotativo', 'Cross-docking em até 24h', 'Picking, kitting e etiquetagem', 'Integração EDI / API com ERP do cliente'],
+        features: ['WMS com inventário rotativo', 'Cross-docking em até 24h', 'Separação de pedidos, montagem de kits e etiquetagem', 'Integração EDI / API com ERP do cliente'],
         specs: [
           { label: 'Área', value: '86 mil m² (ilustrativo)' },
           { label: 'Docas', value: '64 docas niveladoras' },
@@ -284,14 +284,14 @@ export default defineClient({
       {
         slug: 'linha-automotiva-just-in-time',
         client: 'Montadora Delta (fictícia)',
-        title: 'Abastecimento just-in-time para linha automotiva',
+        title: 'Abastecimento de linha automotiva',
         sector: 'Automotivo',
         year: '2024',
         summary: 'Operação dedicada com janelas de 30 minutos entre fornecedores e linha de montagem.',
         challenge:
           'Reduzir paradas de linha causadas por atrasos de abastecimento de 38 fornecedores distribuídos em três estados.',
         solution:
-          'Milk run com rotas fixas, frota dedicada com telemetria, torre de controle exclusiva e buffer de cross-docking em Betim.',
+          'Coletas programadas em rotas fixas, frota dedicada com telemetria, torre de controle exclusiva e estoque de apoio no centro de cross-docking em Betim.',
         results: [
           { value: '−72%', label: 'Paradas de linha por abastecimento' },
           { value: '30 min', label: 'Janela de entrega' },
@@ -309,7 +309,7 @@ export default defineClient({
         year: '2023',
         summary: 'Engenharia de rota de 640 km para equipamento indivisível com excesso dimensional.',
         challenge: 'Deslocar um transformador indivisível do porto até uma subestação, atravessando pontes com restrição de carga.',
-        solution: 'Estudo estrutural de obras de arte, conjunto com linhas de eixo, escolta e operação noturna planejada com as concessionárias.',
+        solution: 'Análise estrutural de pontes e viadutos, conjunto com linhas de eixo, escolta e operação noturna planejada com as concessionárias.',
         results: [
           { value: '640 km', label: 'Percurso planejado' },
           { value: '11', label: 'Noites de operação' },
@@ -322,12 +322,12 @@ export default defineClient({
       {
         slug: 'cabotagem-bens-de-consumo',
         client: 'Grupo Aurora Consumo (fictício)',
-        title: 'Rodo-cabotagem para o Nordeste',
+        title: 'Rodovia e cabotagem para o Nordeste',
         sector: 'Bens de consumo',
         year: '2025',
         summary: 'Migração de 60% do volume rodoviário de longa distância para cabotagem.',
-        challenge: 'Reduzir custo e emissões das transferências entre São Paulo e o Nordeste sem perder previsibilidade.',
-        solution: 'Desenho multimodal com consolidação em Cajamar, embarque em Santos e distribuição rodoviária no destino.',
+        challenge: 'Reduzir custos e emissões das transferências entre São Paulo e o Nordeste sem perder previsibilidade.',
+        solution: 'Operação multimodal com consolidação em Cajamar, embarque em Santos e distribuição rodoviária no destino.',
         results: [
           { value: '−31%', label: 'Emissões estimadas de CO₂' },
           { value: '−18%', label: 'Custo por tonelada' },
@@ -352,10 +352,10 @@ export default defineClient({
       { name: 'Automotivo', detail: 'Abastecimento de linha e peças', share: 24 },
       { name: 'Bens de consumo', detail: 'Transferências e distribuição', share: 21 },
       { name: 'Agronegócio', detail: 'Insumos e máquinas', share: 17 },
-      { name: 'Energia & Infraestrutura', detail: 'Cargas especiais', share: 13 },
+      { name: 'Energia e infraestrutura', detail: 'Cargas especiais', share: 13 },
       { name: 'Químico', detail: 'Produtos controlados', share: 11 },
-      { name: 'Varejo & e-commerce B2B', detail: 'Abastecimento de CDs', share: 9 },
-      { name: 'Farma & Saúde', detail: 'Temperatura controlada', share: 5 },
+      { name: 'Varejo e comércio eletrônico B2B', detail: 'Abastecimento de CDs', share: 9 },
+      { name: 'Farmacêutico e saúde', detail: 'Temperatura controlada', share: 5 },
     ],
 
     timeline: [
@@ -386,13 +386,13 @@ export default defineClient({
 
     testimonials: [
       {
-        quote: 'A operação dedicada mudou a nossa linha: deixamos de falar de atraso e passamos a falar de melhoria contínua.',
+        quote: 'A operação dedicada trouxe mais previsibilidade à linha de montagem. Nossas reuniões passaram a se concentrar nas melhorias do processo.',
         author: 'Mariana Teles',
         role: 'Gerente de Logística',
         company: 'Montadora Delta (fictícia)',
       },
       {
-        quote: 'O nível de engenharia no transporte do transformador foi o de um projeto, não de um frete.',
+        quote: 'O transporte do transformador foi tratado como um projeto de engenharia, com atenção a cada etapa do percurso.',
         author: 'Rafael Moura',
         role: 'Diretor de Implantação',
         company: 'Energia Sul (fictícia)',
@@ -410,7 +410,7 @@ export default defineClient({
 
     jobs: [
       { title: 'Motorista carreteiro', area: 'Operações', location: 'Campinas/SP', type: 'CLT' },
-      { title: 'Analista de torre de controle', area: 'Tecnologia & Monitoramento', location: 'Campinas/SP', type: 'CLT · Turnos' },
+      { title: 'Analista de torre de controle', area: 'Tecnologia e monitoramento', location: 'Campinas/SP', type: 'CLT · Turnos' },
       { title: 'Engenheiro(a) de cargas especiais', area: 'Engenharia', location: 'Curitiba/PR', type: 'CLT' },
       { title: 'Executivo(a) comercial', area: 'Comercial', location: 'Belo Horizonte/MG', type: 'CLT · Híbrido' },
     ],
