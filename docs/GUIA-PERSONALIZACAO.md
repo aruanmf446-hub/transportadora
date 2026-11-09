@@ -19,7 +19,7 @@ inexistente…), o build para com uma mensagem indicando o campo.
    CLIENT=acme npm run build
    ```
 
-Para um cliente que é “quase igual” a outro, use `extendClient(base, { …só o que muda… })`
+Para um cliente com configuração semelhante à de outro, use `extendClient(base, { …só o que muda… })`
 (veja `clients/nordhaven/index.ts`): objetos são mesclados, listas são substituídas.
 
 Desligue o modo demonstração quando os dados forem reais: `demo: { enabled: false }`.
@@ -52,7 +52,7 @@ brand: {
 |---|---|
 | `bg`, `surface`, `surfaceStrong` | fundo, superfícies e áreas de mídia |
 | `ink`, `inkSoft`, `muted`, `line` | texto principal, secundário, apoio e linhas |
-| `accent`, `onAccent` | cor de destaque e o texto que vai sobre ela |
+| `accent`, `onAccent` | cor de destaque e o texto exibido sobre ela |
 | `inverseBg`, `inverseInk`, `inverseMuted`, `inverseLine` | seções escuras, menu e rodapé |
 
 Verifique o contraste de `ink` sobre `bg` e de `onAccent` sobre `accent` (mínimo 4.5:1 para texto).
@@ -126,8 +126,8 @@ data: {
 }
 ```
 
-Os contadores animam até o valor configurado (o valor final já está no HTML para SEO e para quem
-não roda JavaScript). Use apenas números fornecidos e comprováveis pelo cliente. Uma seção `metrics`
+Os contadores animam até o valor configurado (o valor final já está no HTML para SEO e para visitantes cujo navegador
+não executa JavaScript). Use apenas números fornecidos e comprováveis pelo cliente. Uma seção `metrics`
 pode exibir um subconjunto: `content: { options: { stats: ['fleet', 'otd'] } }`.
 
 ## 7. Regiões atendidas e mapa de rotas
@@ -157,8 +157,8 @@ Cada página tem `sections: [...]`. Cada seção aceita:
 | `content` | `eyebrow`, `title` (use `|` para quebrar linha), `lead`, `body`, `image`, `cta`, `secondaryCta`, `items`, `options` |
 
 Ao remover uma seção, o template remove a renderização, o link no índice/menu, as animações e
-scripts associados — sem espaços vazios. Seções que dependem de dados somem sozinhas quando o dado
-não existe (ex.: `cases` sem cases, `tracking` sem integração de rastreamento).
+scripts associados — sem espaços vazios. Seções que dependem de dados somem sozinhas quando os dados
+não estão disponíveis (ex.: `cases` sem cases, `tracking` sem integração de rastreamento).
 
 **Tipos disponíveis:** `hero`, `page-header`, `manifesto`, `about`, `history`, `solutions`,
 `road-transport`, `special-cargo`, `multimodal`, `service-feature`, `operations`, `fleet`, `truck-3d`,
@@ -221,7 +221,7 @@ integrations: {
 ```
 
 - Número de WhatsApp apenas com dígitos e DDI (`55…`).
-- Cotação: não há cálculo de frete. Os dados viram uma mensagem codificada para WhatsApp e/ou `mailto:`.
+- Cotação: não há cálculo de frete. Os dados são convertidos em uma mensagem codificada para WhatsApp e/ou `mailto:`.
   Nada é armazenado no navegador.
 - Rastreamento: com `{code}` na URL, o visitante digita o código e é levado ao sistema oficial;
   sem `{code}`, o botão apenas abre a URL. O site nunca exibe status de carga.

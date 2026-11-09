@@ -3,7 +3,7 @@
 Site estático premium para transportadoras, operadores logísticos e empresas B2B de transporte.
 **Uma base técnica, várias identidades comerciais**: tudo o que muda de um cliente para outro
 (marca, cores, fontes, textos, números, imagens, modelos 3D, seções, páginas e integrações)
-vive em arquivos de configuração locais — sem banco de dados, sem backend, sem CMS.
+fica em arquivos de configuração locais — sem banco de dados, sem backend, sem CMS.
 
 > A demonstração usa a empresa **fictícia** “Ortiva”. Números, clientes, cases e depoimentos
 > são ilustrativos e aparecem marcados como tal (`demo.enabled`).
@@ -78,10 +78,10 @@ scripts/                 ← check-links, e2e, render-assets
 docs/GUIA-PERSONALIZACAO.md
 ```
 
-O guia completo para configurar e vender para um novo cliente está em
+O guia completo de configuração e comercialização para novos clientes está em
 **[docs/GUIA-PERSONALIZACAO.md](docs/GUIA-PERSONALIZACAO.md)**.
 
-## O que o template não faz (de propósito)
+## Limites do template
 
 - Não calcula frete: a cotação gera uma mensagem para WhatsApp ou e-mail (`mailto:`).
 - Não simula rastreamento: o componente redireciona para a plataforma oficial configurada.
